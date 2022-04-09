@@ -6,9 +6,10 @@ import numpy as np
 class MonoexponentialModel(tf.keras.Model):
     def __init__(self, 
                  filling_pulse=20 * 10 ** (-6), 
-                 time_constant_power=-2.0,
-                 amplitude=1.0,
+                 time_constant_power=None,
+                 amplitude=None,
                  M=5.861, 
+                 center=False,
                  **kwargs):
         
         super().__init__(**kwargs)            
@@ -16,8 +17,17 @@ class MonoexponentialModel(tf.keras.Model):
         self.filling_pulse = tf.Variable(filling_pulse, trainable=False)
         self.M = tf.Variable(M, trainable=False)
         
-        self.time_constant_power = tf.Variable(time_constant_power)
-        self.amplitude = tf.Variable(amplitude)
+        if time_constant_power is None:
+            power = float(np.random.uniform(low=-3, high=-0.5))
+            self.time_constant_power = tf.Variable(power)
+        else:
+            self.time_constant_power = tf.Variable(time_constant_power)
+            
+        if amplitude is None:
+            amp = float(np.random.uniform(low=0.3, high=3.3))
+            self.amplitude = tf.Variable(amp)
+        else:
+            self.amplitude = tf.Variable(amplitude)
         
     def call(self, frequency):
         
