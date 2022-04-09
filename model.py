@@ -9,7 +9,6 @@ class MonoexponentialModel(tf.keras.Model):
                  time_constant_power=None,
                  amplitude=None,
                  M=5.861, 
-                 center=False,
                  **kwargs):
         
         super().__init__(**kwargs)            
@@ -29,8 +28,8 @@ class MonoexponentialModel(tf.keras.Model):
         else:
             self.amplitude = tf.Variable(amplitude)
         
-    def call(self, frequency):
         
+    def get_phi(self, frequency):
         time_constant = tf.pow(10.0, self.time_constant_power)
         
         exp0 = tf.exp(-0.05 / (time_constant * frequency))
@@ -40,7 +39,37 @@ class MonoexponentialModel(tf.keras.Model):
         
         phi = time_constant * frequency * exp0 * (1.0 - exp1 - exp2 + exp3)
         
-        dlts = self.amplitude * self.M * phi
+        return phi
+        
+    
+    def call(self, frequency):
+        dlts = self.amplitude * self.M * self.get_phi(frequency)
+        
+        return dlts
+    
+    
+    
+class MonoexponentialModelP(MonoexponentialModel):
+    def __init__(self, 
+                 filling_pulse=20 * 10 ** (-6), 
+                 time_constant_power=None,
+                 amplitude=None,
+                 p = 1.0,
+                 M=5.861, 
+                 **kwargs):
+        
+        super().__init__(filling_pulse=20 * 10 ** (-6),
+                         time_constant_power=None,
+                         amplitude=None,
+                         M=5.861, 
+                         **kwargs)
+        
+        self.p_coef = tf.Variable(p)
+      
+    
+    def call(self, frequency):
+        phi = super().get_phi(frequency)
+        dlts = self.amplitude * ((self.M * phi) ** self.p_coef)
         
         return dlts
     
@@ -50,6 +79,7 @@ def make_exp_data(f_pulse,
                   time_constant,
                   ampl,
                   std_dev,
+                  p=1.0,
                   start_f=1, 
                   stop_f=2500,
                   num_ex=1000):
@@ -59,10 +89,19 @@ def make_exp_data(f_pulse,
     
     t_c_pwr = float(np.log10(time_constant))
 
-    fs_model = MonoexponentialModel(filling_pulse=f_pulse,
-                                    time_constant_power=t_c_pwr,
-                                    amplitude=ampl
-                                    )
+    
+    if p == 1.0:
+        fs_model = MonoexponentialModel(filling_pulse=f_pulse,
+                                        time_constant_power=t_c_pwr,
+                                        amplitude=ampl
+                                       )
+    else:
+        fs_model = MonoexponentialModelP(filling_pulse=f_pulse,
+                                         time_constant_power=t_c_pwr,
+                                         amplitude=ampl,
+                                         p=p
+                                        )
+    
 
     noise = tf.random.normal(stddev=std_dev, shape=[frequency.shape[0]])
     
