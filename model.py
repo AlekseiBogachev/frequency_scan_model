@@ -58,10 +58,10 @@ class MonoexponentialModelP(MonoexponentialModel):
                  M=5.861, 
                  **kwargs):
         
-        super().__init__(filling_pulse=20 * 10 ** (-6),
-                         time_constant_power=None,
-                         amplitude=None,
-                         M=5.861, 
+        super().__init__(filling_pulse=filling_pulse,
+                         time_constant_power=time_constant_power,
+                         amplitude=amplitude,
+                         M=M, 
                          **kwargs)
         
         self.p_coef = tf.Variable(p)
@@ -148,14 +148,17 @@ def print_results(frequency, actual_dlts, initial_model, history = None, final_m
     if not (final_model is None):
         ax0.semilogx(frequency, final_model(frequency), 'r', label="Final model")
     
+    ax0.set_xlabel('Frequency, Hz')
+    ax0.set_ylabel('DLTS')
     ax0.legend()
+    ax0.grid()
 
     if not ((final_model is None) or (history is None)):
         ax1.plot(history.history['loss'])
         ax1.set_xlabel('Epoch')
-        ax1.set_ylim([0, max(plt.ylim())])
         ax1.set_ylabel('Loss [Mean Squared Error]')
-#         ax1.set_title('Keras training progress')
+        plt.ylim([0, max(plt.ylim())])
+        ax1.grid()
     
     if not ((final_model is None) or (history is None)):
         return fig, (ax0, ax1)
