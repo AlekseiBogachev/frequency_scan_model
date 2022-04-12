@@ -137,18 +137,27 @@ def print_results(frequency, actual_dlts, initial_model, history = None, final_m
         print(f'MSE = {final_mse:.4f}')
         print(f'RMSE = {tf.sqrt(final_mse):.6f}')
         
-
-    plt.semilogx(frequency, actual_dlts, '.g', label="Actual values", alpha=0.3)
-    plt.semilogx(frequency, initial_model(frequency), '-.b', label="Initial model", alpha=0.5)
+    
+    if not ((final_model is None) or (history is None)):
+        fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(15, 5))
+    else:
+        fig, ax0 = plt.subplots(1, 1, figsize=(7,5))
+        
+    ax0.semilogx(frequency, actual_dlts, '.g', label="Actual values", alpha=0.3)
+    ax0.semilogx(frequency, initial_model(frequency), '-.b', label="Initial model", alpha=0.5)
     if not (final_model is None):
-        plt.semilogx(frequency, final_model(frequency), 'r', label="Final model")
-    plt.legend()
-    plt.show()
+        ax0.semilogx(frequency, final_model(frequency), 'r', label="Final model")
+    
+    ax0.legend()
 
     if not ((final_model is None) or (history is None)):
-        plt.plot(history.history['loss'])
-        plt.xlabel('Epoch')
-        plt.ylim([0, max(plt.ylim())])
-        plt.ylabel('Loss [Mean Squared Error]')
-        plt.title('Keras training progress')
-        plt.show()
+        ax1.plot(history.history['loss'])
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylim([0, max(plt.ylim())])
+        ax1.set_ylabel('Loss [Mean Squared Error]')
+#         ax1.set_title('Keras training progress')
+    
+    if not ((final_model is None) or (history is None)):
+        return fig, (ax0, ax1)
+    else:
+        return fig, ax0
