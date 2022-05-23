@@ -32,12 +32,15 @@ class MonoexponentialModel(tf.keras.Model):
     def get_phi(self, frequency):
         time_constant = tf.pow(10.0, self.time_constant_power)
         
-        exp0 = tf.exp(-0.05 / (time_constant * frequency))
-        exp1 = tf.exp((self.filling_pulse * frequency - 0.45) / (time_constant * frequency))
-        exp2 = tf.exp(-0.5 / (time_constant * frequency))
-        exp3 = tf.exp((self.filling_pulse * frequency - 0.95) / (time_constant * frequency))
+        a = time_constant * frequency
+        b = self.filling_pulse * frequency
         
-        phi = time_constant * frequency * exp0 * (1.0 - exp1 - exp2 + exp3)
+        exp0 = tf.exp(-0.05 / (a))
+        exp1 = tf.exp((b - 0.45) / (a))
+        exp2 = tf.exp(-0.5 / (a))
+        exp3 = tf.exp((b - 0.95) / (a))
+        
+        phi = a * exp0 * (1.0 - exp1 - exp2 + exp3)
         
         return phi
       
