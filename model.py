@@ -40,9 +40,26 @@ class MonoexponentialModel(tf.keras.Model):
         phi = time_constant * frequency * exp0 * (1.0 - exp1 - exp2 + exp3)
         
         return phi
+      
+    def get_max_phi(self):
+        f_pwr_grid = tf.linspace(start=tf.experimental.numpy.log10(1.0), 
+                         stop=tf.experimental.numpy.log10(2500.0), 
+                         num=100000, 
+                         name=None, 
+                         axis=0)
+        
+        f_grid = tf.pow(tf.constant(10.0, dtype='float64'), f_pwr_grid)
+        f_grid = tf.cast(f_grid, dtype='float32')
+        
+        M = 1.0 / tf.math.reduce_max(self.get_phi(f_grid))
+        
+        return M
         
     
     def call(self, frequency):
+        
+        self.M = self.get_max_phi()
+        
         dlts = self.amplitude * self.M * self.get_phi(frequency)
         
         return dlts
@@ -69,6 +86,9 @@ class MonoexponentialModelP(MonoexponentialModel):
     
     def call(self, frequency):
         phi = super().get_phi(frequency)
+        
+        self.M = self.get_max_phi()
+        
         dlts = self.amplitude * ((self.M * phi) ** self.p_coef)
         
         return dlts
