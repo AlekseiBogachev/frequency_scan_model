@@ -5,29 +5,18 @@ import numpy as np
 
 class MonoexponentialModel(tf.keras.Model):
     def __init__(self, 
-                 filling_pulse=20 * 10 ** (-6), 
-                 time_constant_power=None,
-                 amplitude=None,
-                 M=5.861, 
+                 filling_pulse,
+                 time_constant_power,
+                 amplitude, 
                  **kwargs):
         
         super().__init__(**kwargs)            
         
         self.filling_pulse = tf.Variable(filling_pulse, trainable=False)
-        self.M = tf.Variable(M, trainable=False)
+        self.M = tf.Variable(5.861, trainable=False)
         
-        if time_constant_power is None:
-            power = float(np.random.uniform(low=-3, high=-0.5))
-            self.time_constant_power = tf.Variable(power)
-        else:
-            self.time_constant_power = tf.Variable(time_constant_power)
-            
-        if amplitude is None:
-            amp = float(np.random.uniform(low=0.3, high=3.3))
-            self.amplitude = tf.Variable(amp)
-        else:
-            self.amplitude = tf.Variable(amplitude)
-        
+        self.time_constant_power = tf.Variable(time_constant_power)
+        self.amplitude = tf.Variable(amplitude)
         
     def get_phi(self, frequency):
         time_constant = tf.pow(10.0, self.time_constant_power)
@@ -71,17 +60,15 @@ class MonoexponentialModel(tf.keras.Model):
     
 class MonoexponentialModelP(MonoexponentialModel):
     def __init__(self, 
-                 filling_pulse=20 * 10 ** (-6), 
-                 time_constant_power=None,
-                 amplitude=None,
-                 p = 1.0,
-                 M=5.861, 
+                 filling_pulse, 
+                 time_constant_power,
+                 amplitude,
+                 p = 1.0, 
                  **kwargs):
         
         super().__init__(filling_pulse=filling_pulse,
                          time_constant_power=time_constant_power,
                          amplitude=amplitude,
-                         M=M, 
                          **kwargs)
         
         self.p_coef = tf.Variable(p)
