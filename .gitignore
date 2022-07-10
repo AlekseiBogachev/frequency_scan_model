@@ -1,4 +1,7 @@
 /miscellaneous
+/dataset
+/models
+/plots
 .ipynb_checkpoints
 __pycache__
 *.7z
