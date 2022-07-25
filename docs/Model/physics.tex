@@ -1,0 +1,76 @@
+\chapter{Физическая модель}
+
+    В данном разделе представленно описание модели частотного скана 
+    в физических формулах.
+
+    Согласно публикации \cite{LangDLTS} скорость эмиссии носителей
+    заряда определяется выражением \ref{eq:emission_rate}. В
+    выражении \ref{eq:emission_rate} приведены обозначения для
+    неосновных носителей. Аналогичное выражение может быть написано 
+    для основных.
+    \begin{equation}
+        \label{eq:emission_rate}
+        e_1 = \left(\sigma_1 \langle\upsilon_1\rangle N_{D1}/g_1\right)\exp
+        \left(\frac{-\Delta E}{kT}\right),
+    \end{equation}
+    где
+    \begin{description}
+        \item[$\sigma_1$] -- сечение захвата носителей заряда,
+        \item[$\langle\upsilon_1\rangle$] -- средняя тепловая скорость
+        носителей заряда,
+        \item[$N_{D1}$] -- эффективная плотность состояний в зоне неосновных
+        носителей заряда,
+        \item[$g_1$] -- фактор вырождения уровня соответствующего глубокого
+        уровня,
+        \item[$\Delta E$]  -- энергия активации глубокого уровня,
+        \item[$k$] -- постоянная Больцмана,
+        \item[$T$] -- абсолютная температура.
+    \end{description}
+
+    Стандарт ASTM F978-02 предлагает ввести предэкспоненциальный множитель
+    $B$, определяемый выражением \ref{eq:pre_exp_factor}, и вычислять его
+    при анализе результатов измерений.
+    \begin{equation}
+        \label{eq:pre_exp_factor}
+        B = \frac{\sigma_1 \langle\upsilon_1\rangle N_{D1}}{g_1 T^2}
+    \end{equation}
+
+    С учётом предэкспоененциального множителя $B$ выражение 
+    \ref{eq:emission_rate} принимает вид выражения \ref{eq:emission_rate_ASTM}.
+    \begin{equation}
+        \label{eq:emission_rate_ASTM}
+        e_1 = BT^2\exp\left(\frac{-\Delta E}{kT}\right).
+    \end{equation}
+    
+    Соотвтетственно, постоянная времени релаксации ёмкости, обратнопропорциональная
+    скорости эмиссии носителей заряда, определяется выражением \ref{eq:tau}.
+    \begin{equation}
+        \label{eq:tau}
+        \tau_1 = \frac{1}{e_1} = \frac{\exp\left(\frac{\Delta E}{kT}\right)}{BT^2}.
+    \end{equation}
+
+    Согласно обзорам \cite{Peaker_DLTS_review_2018} и \cite{Tin_DLTS_2012} сигнал 
+    релаксации ёмкости p-n-перехода, вызванный одним глубоким уровнем носит
+    экспоненциальный характер и может быть описан выражением
+    \ref{eq:cap_decay_maj}, если он вызван влиянием ловушек основных носителей
+    зряда, и выражением \ref{eq:cap_decay_min}, если он вызван ловушками 
+    неосновных ностиелей заряда.
+    \begin{equation}
+        \label{eq:cap_decay_maj}
+       \Delta C\left(t\right) = C_0-A\exp{\left(\frac{-t}{\tau}\right)},
+    \end{equation}
+    \begin{equation}
+        \label{eq:cap_decay_min}
+        \Delta C\left(t\right) = C_0+A\exp{\left(\frac{-t}{\tau}\right)},
+    \end{equation}
+    где 
+    \begin{enumerate}
+        \item[$C_0$] -- барьерная ёмкость p-n-перехода в начальный момент времение,
+        \item[$A$] -- амплитуда сигнала релаксации ёмкости.
+    \end{enumerate}
+
+    В спектрометре DLS-82E используется корреляционный метод обработки сигнала
+    релаксации ёмкости, при этом перед корреляционной обработкой из сигнала
+    вычитается постоянная составляющая. Таким образом,
+
+
