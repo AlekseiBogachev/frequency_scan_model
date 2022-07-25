@@ -71,6 +71,48 @@
 
     В спектрометре DLS-82E используется корреляционный метод обработки сигнала
     релаксации ёмкости, при этом перед корреляционной обработкой из сигнала
-    вычитается постоянная составляющая. Таким образом,
+    вычитается постоянная составляющая. Таким образом, выражения 
+    \ref{eq:cap_decay_maj}, \ref{eq:cap_decay_min} принимают следующий вид:
+    \begin{equation}
+        \label{eq:cap_decay}
+        \Delta C\left(t\right) = A\exp{\left(\frac{-t}{\tau}\right)},
+    \end{equation}
 
 
+    Выходной сигнал коррелятора спектрометра DLS-82E определяется 
+    выражением \ref{eq:eq1}.
+
+    \begin{equation}
+        \label{eq:eq1}
+        S\left(\tau,C_A,F_0, t_1\right) = C_A K_{BS} K_{LS} \phi\left(\tau,F_0,t_1\right),
+    \end{equation}
+    где
+    \begin{description}
+        \item[$C_A$] -- амплитуда емкостного релаксационного сигнала,
+        \item[$K_{BS}$] -- масштабный коэффициент, зависящий от чувствительности 
+        емкостного моста,
+        \item[$K_{LS}$] -- масштабный коэффициент селектора,
+        \item[$\tau$] -- постоянная времени релаксации гулбокого уровня,
+        \item[$F_0$] -- частота сканирования импульсов заполнения,
+        \item[$t_1$] -- длительность импульса заполнения,
+        \item[$\phi\left(\tau,F_0,t_1\right)$] -- функция определяемая выражением
+        \ref{eq:eq2}.
+    \end{description}
+    \begin{equation}
+        \label{eq:eq2}
+        \phi\left(\tau,F_0,t_1\right) = 
+        M \tau F_0 e^{-\frac{0.05}{\tau F_0}}
+        \left(1-e^{\frac{t_1 F_0-0.45}{\tau F_0}}
+        -e^{-\frac{0.5}{\tau F_0}}+
+        e^{\frac{t_1 F_0-0.95}{\tau F_0}}\right),
+    \end{equation}
+    где $M$ -- масштабный множитель, определяемый выражением \ref{eq:scale_factor}.
+    \begin{equation}
+        \label{eq:scale_factor}
+        M = \frac{1}{\max{\left[
+        \tau F_0 e^{-\frac{0.05}{\tau F_0}}
+        \left(1-e^{\frac{t_1 F_0-0.45}{\tau F_0}}
+        -e^{-\frac{0.5}{\tau F_0}}+
+        e^{\frac{t_1 F_0-0.95}{\tau F_0}}\right)
+        \right]}}
+    \end{equation}
