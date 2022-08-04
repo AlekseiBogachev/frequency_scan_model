@@ -29,7 +29,7 @@ class FrequencyScan(tf.Module):
 
         Parameters
         ----------
-        val: float
+        val : float
             Значение амплитуды сигнала релаксации ёмкости. Может быть
             целым числом (int), числом с плавающей точкой (float),
             tf.Variable, tf.Tensor или объектом Python, преобразуемым в 
@@ -63,7 +63,7 @@ class FrequencyScan(tf.Module):
 
         Parameters
         ----------
-        val: float
+        val : float
             Значение постоянной времени сигнала релаксации ёмкости. 
             Может быть целым числом (int), числом с плавающей точкой 
             (float), tf.Variable, tf.Tensor или объектом Python,
@@ -97,7 +97,7 @@ class FrequencyScan(tf.Module):
 
         Parameters
         ----------
-        val: float
+        val : float
             Значение длительности импульса заполнения. Может быть целым 
             числом (int), числом с плавающей точкой (float),
             tf.Variable, tf.Tensor или объектои Python, преобразуемым в 
@@ -131,7 +131,7 @@ class FrequencyScan(tf.Module):
 
         Parameters
         ----------
-        val: float
+        val : float
             Значение коэффициента нелинейности-неэкспоненциальности.
             Может быть целым числом (int), числом с плавающей точкой 
             (float), tf.Variable, tf.Tensor или объектом Python, 
@@ -192,9 +192,9 @@ class FrequencyScan(tf.Module):
     def stop_val(self):
         """float: Минимальное значение разницы в среднеквадратической ошибке.
         
-        Если при stop_val не None, то идентификация останавливается, когда 
-        модуль разницы между среднеквадратической ошибкой на предыдущей и 
-        текущей итерациях меньше stop_val.
+        Если stop_val не None (значение по умолчанию), то идентификация
+        останавливается, когда модуль разницы между среднеквадратической
+        ошибкой на предыдущей и текущей итерациях меньше stop_val.
 
         """
         return self._stop_val
@@ -206,7 +206,10 @@ class FrequencyScan(tf.Module):
 
     @property
     def verbose(self):
-        """bool: Если True - выводится дополнительная информация при идентификации.
+        """bool: Вывод дополнительной информации.
+
+        Если True - выводится дополнительная информация при 
+        идентификации параметров модели.
 
         Дополнительная информация выводится в консоль и имеет следующий 
         вид:
@@ -260,20 +263,60 @@ class FrequencyScan(tf.Module):
 
         Parameters
         ----------
-        amplitude = 3.5,
-        time_constant_power = -2.0,
-        filling_pulse = 20*10**-6,
-        p_coef = 1.0,
-        
-        fit_p_coef = True,
-        learning_rate = 0.1,
-        n_iters = 1000,
-        stop_val = None,
-        verbose = False,
-
-        tf_in_out = False,
-         
+        amplitude : float, default=3.5
+            Значение амплитуды сигнала релаксации ёмкости в условных
+            единицах. Является начальным значением амплитуды при
+            идентификации параметров модели.
+        time_constant_power : float, default=-2.0
+            Значение постоянной времени сигнала релаксации ёмкости в 
+            секундах. Является начальным значением постоянной времени
+            сигнала релаксации ёмкости при идентификации параметров
+            модели.
+        filling_pulse : float, default=20*10**-6
+            Значение длительности импульса заполнения в секундах. Не 
+            изменяется во время идентификации.
+        p_coef : float, default=1.0
+            Значение коэффициента нелинейности-неэкспоненциальности.
+            Безразмерная величина. Является начальным значением при
+            коэффициента нелинейности-неэкспоненциальности при 
+            идентификации параметров модели.
+        fit_p_coef : bool, default=True
+            Если fit_p_coef == True, при идентификации параметров модели
+            происходит уточнение коэффициента нелинейности-неэкспоненциальности
+            p, если fit_p_coef == False, то коэффициент p остаётся
+            неизменным.
+        learning_rate : float, default=0.1
+            Скорость градиентного спуска.
+        n_iters : int, default=1000
+            Максимальное количество итераций при идентификации 
+            параметров модели.
+        stop_val : float, default=None
+            Минимальное изменение среднеквадратической ошибки при
+            идентификации. Данное значение необходимо для ранней остановки
+            алгоритма идентификации параметров. Если stop_val является 
+            None, то выполняется заданное максимальное количество итераций.
+            Если задано другое значение, то идентификация останавливается,
+            когда значение модуля разности текущей и пердшествующей
+            среднеквадратической ошибки становится меньше stop_val. В
+            псевдокоде условие остановки идентификации можно записать
+            следующим образом:
+            abs(previous_mse - current_mse) < stop_val.
+        verbose : bool, default=False
+            Если verbose == True, то при идентификации в консоль выводится
+            дополнительная информация, имеющая следущий вид:
+            iter # номер итерации
+            amp: значение амплитуды процесса релаксации
+            tau: значение постоянной времени процесса релаксации
+            p: значение коэффициента p
+            Loss: значение среднеквадратической ошибки
+        tf_in_out : bool, default=False
+            Флаг, определяющий тип выводимых параметров модели.
+            Если True, то значения, возвращаемые свойствами amplitude, 
+            time_constant_power, filling_pulse, p_coef имеют тип 
+            tf.Varivable(dtype='float64'), иначе numpy.float64.
         **kwargs
+            Дополнительные аргументы, определяемые классом родителем 
+            tf.Module.
 
         """
 
@@ -296,7 +339,30 @@ class FrequencyScan(tf.Module):
     def _get_phi(self,
                  frequency_powers
                 ):
+        """Метод, вычисляющий функцию phi без учёта масштабного 
+        коэффициента M [1]_.
 
+        Parameters
+        ----------
+        frequency_powers : tf.Variable(dtype='float64')
+            Одномерный массив, содержащий значения десятичных логарифмов
+            частоты на частотном скане.
+
+        Returns
+        -------
+        tf.Variable(dtype='float64')
+            Одномерный массив, содержащий значения функции phi для 
+            каждого значения frequency_powers.
+
+        References
+        ----------
+        .. [1] Krylov V. P., Bogachev A. M., Pronin T. Yu. Deep level 
+        relaxation spectroscopy and non-destructive testing of potential
+        defects in the semiconductor electronic component base. 
+        Radiopromyshlennost, 2019, vol. 29, no. 2, pp. 35–44 (In 
+        Russian). DOI: 10.21778/2413-9599-2019-29-2-35-44.
+
+        """
         time_constant = tf.pow(10.0, self._time_constant_power)
         frequency = tf.pow(10.0, frequency_powers)
 
@@ -316,7 +382,39 @@ class FrequencyScan(tf.Module):
                n_iters=100,
                stop_val = None,
               ):
+        """Метод, вычисляющий масштабный коэффициент М [1]_.
 
+        Коэффициент М = 1/max(phi) при текущих значениях импульса 
+        постоянной времени, импульса заполнения.
+        Максимум определяется методом градиентного спуска.
+
+        Parameters
+        ----------
+        learning_rate : float, default=0.1
+            Скорость градиентного спуска при поиске максимума phi.
+        n_iters : int, default=100
+            Максимальное количество итераций при поиску максимума
+        stop_val : float, default=None
+            Минимальное изменение значения максимума. Данный параметр 
+            необходим для ранней остановкиалгоритма поиска максимума. 
+            Если stop_val является None, то выполняется заданное 
+            максимальное количество итераций. Если задано другое 
+            значение, то поиск максимума останавливается, когда модуль
+            разницы между текущим и предшествующим значением максимума
+            становится меньше stop_val. В псевдокоде данное условие 
+            можно записать следующим образом:
+            abs(previous_max - current_max) < stop_val.
+
+
+        References
+        ----------
+        .. [1] Krylov V. P., Bogachev A. M., Pronin T. Yu. Deep level 
+        relaxation spectroscopy and non-destructive testing of potential
+        defects in the semiconductor electronic component base. 
+        Radiopromyshlennost, 2019, vol. 29, no. 2, pp. 35–44 (In 
+        Russian). DOI: 10.21778/2413-9599-2019-29-2-35-44.
+
+        """
         prev_loss = tf.Variable(np.inf, dtype='float64')
         max_freq_pow = tf.Variable(-self._time_constant_power, dtype='float64')
 
@@ -338,7 +436,33 @@ class FrequencyScan(tf.Module):
         
         
     def __call__(self, f_powers):
+        """Значение сигнала DLTS.
 
+        Метод вычисляет сигнал DLTS - сигнал на выходе коррелятора 
+        спектрометра DLS-82E [1]_.
+
+        Parameters
+        ----------
+        f_powers : array_like
+            Одномерный массив, содержащий значения десятичных логарифмов
+            частоты на частотном скане. Данный параметр также может быть
+            целым числом (int) или числом с плавающей точкой (float), а
+            также tf.Tensor или любым объектом Python, который может 
+            быть преобразован в tf.Tensor.
+
+        Returns
+        -------
+        
+
+        References
+        ----------
+        .. [1] Krylov V. P., Bogachev A. M., Pronin T. Yu. Deep level 
+        relaxation spectroscopy and non-destructive testing of potential
+        defects in the semiconductor electronic component base. 
+        Radiopromyshlennost, 2019, vol. 29, no. 2, pp. 35–44 (In 
+        Russian). DOI: 10.21778/2413-9599-2019-29-2-35-44.
+
+        """
         frequency_powers = tf.Variable(f_powers, dtype='float64')
         
         M = self._get_M(learning_rate=0.2,
