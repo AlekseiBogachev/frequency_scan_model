@@ -13,7 +13,9 @@ class FrequencyScan(tf.Module):
     Модель моноэкспоненциального частотного скана с учётом показателя
     нелинейности-неэкспоненциальности p. Модель позволяет вычислять 
     частотный скан по заданным параметрам, а также идентифицировать 
-    параметры модели частотного скана по экспериментальным данным. 
+    параметры модели частотного скана по экспериментальным данным методом 
+    простого градиентного спуска.
+
     Термин "моноэкспоненциальный" подразумевает, что модель имеет только
     один набор параметров сигнала релаксации (амплитуда и частота).
 
@@ -39,7 +41,7 @@ class FrequencyScan(tf.Module):
         numpy.float64 или tf.Varivable(dtype='float64')
             Значение амплитуды сигнала релаксации ёмкости. Если свойство
             tf_in_out == False (значение по умолчанию), то возвращаемое
-            значение имеет тип numpy.float64. Если tf_in_out == False, 
+            значение имеет тип numpy.float64. Если tf_in_out == True, 
             то возвращаемое значение имеет тип 
             tf.Varivable(dtype='float64').
 
@@ -74,7 +76,7 @@ class FrequencyScan(tf.Module):
             Значение постоянной времени сигнала релаксации ёмкости. Если
             свойство tf_in_out == False (значение по умолчанию), то 
             возвращаемое значение имеет тип numpy.float64. Если 
-            tf_in_out == False, то возвращаемое значение имеет тип 
+            tf_in_out == True, то возвращаемое значение имеет тип 
             tf.Varivable(dtype='float64').
 
         """
@@ -107,9 +109,8 @@ class FrequencyScan(tf.Module):
         numpy.float64 или tf.Varivable(dtype='float64')
             Значение длительности импульса заполнения. Если свойство 
             tf_in_out == False (значение по умолчанию), то возвращаемое
-            значение имеет тип numpy.float64. Если tf_in_out == False, 
-            то возвращаемое значение имеет тип 
-            tf.Varivable(dtype='float64').
+            значение имеет тип numpy.float64. Если tf_in_out == True, 
+            то возвращаемое значение имеет тип tf.Varivable(dtype='float64').
 
         """
         if self._tf_in_out:
@@ -143,7 +144,7 @@ class FrequencyScan(tf.Module):
             Значение коэффициента нелинейности-неэкспоненциальности. 
             Если свойство tf_in_out == False (значение по умолчанию), то
             возвращаемое значение имеет тип numpy.float64. Если 
-            tf_in_out == False, то возвращаемое значение имеет тип 
+            tf_in_out == True, то возвращаемое значение имеет тип 
             tf.Varivable(dtype='float64').
 
         """
@@ -159,6 +160,7 @@ class FrequencyScan(tf.Module):
 
     @property
     def fit_p_coef(self):
+        """bool: Если True - выполняется идентификация коэффициента p."""
         return self._fit_p_coef
 
     @fit_p_coef.setter
@@ -168,6 +170,7 @@ class FrequencyScan(tf.Module):
 
     @property
     def learning_rate(self):
+        """float: Скорость градиентного спуска."""
         return self._learning_rate
 
     @learning_rate.setter
@@ -177,6 +180,7 @@ class FrequencyScan(tf.Module):
 
     @property
     def n_iters(self):
+        """int: максимальное количество итераций при идентификации модели."""
         return self._n_iters
 
     @n_iters.setter
@@ -186,6 +190,13 @@ class FrequencyScan(tf.Module):
 
     @property
     def stop_val(self):
+        """float: Минимальное значение разницы в среднеквадратической ошибке.
+        
+        Если при stop_val не None, то идентификация останавливается, когда 
+        модуль разницы между среднеквадратической ошибкой на предыдущей и 
+        текущей итерациях меньше stop_val.
+
+        """
         return self._stop_val
 
     @stop_val.setter
@@ -195,6 +206,17 @@ class FrequencyScan(tf.Module):
 
     @property
     def verbose(self):
+        """bool: Если True - выводится дополнительная информация при идентификации.
+
+        Дополнительная информация выводится в консоль и имеет следующий 
+        вид:
+        iter # номер итерации
+        amp: значение амплитуды процесса релаксации
+        tau: значение постоянной времени процесса релаксации
+        p: значение коэффициента p
+        Loss: значение среднеквадратической ошибки
+
+        """
         return self._verbose
 
     @verbose.setter
@@ -204,6 +226,13 @@ class FrequencyScan(tf.Module):
         
     @property
     def tf_in_out(self):
+        """bool: Флаг, определяющий тип выводимых параметров модели.
+
+        Если True, то значения, возвращаемые свойствами amplitude, 
+        time_constant_power, filling_pulse, p_coef имеют тип 
+        tf.Varivable(dtype='float64'), иначе numpy.float64.
+
+        """
         return self._tf_in_out
 
     @tf_in_out.setter
@@ -227,6 +256,27 @@ class FrequencyScan(tf.Module):
                  
                  **kwargs
                 ):
+        """Инициализация модели моноэкспоненциального частотного скана.
+
+        Parameters
+        ----------
+        amplitude = 3.5,
+        time_constant_power = -2.0,
+        filling_pulse = 20*10**-6,
+        p_coef = 1.0,
+        
+        fit_p_coef = True,
+        learning_rate = 0.1,
+        n_iters = 1000,
+        stop_val = None,
+        verbose = False,
+
+        tf_in_out = False,
+         
+        **kwargs
+
+        """
+
         super().__init__(**kwargs)
 
         self.tf_in_out = tf_in_out
