@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1, T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{csquotes}
+
+\usepackage[
+    backend = biber,
+    style = numeric,
+]{biblatex}
+
+\addbibresource{Refs.bib}
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+
+\title{Моделирование частотных сканов}
+\author{Богачев А.М.}
+\date{\today}
+
+
+\begin{document}
+    \maketitle
+
+    \tableofcontents
+
+    % \include{abbreviations}
+
+    \include{objectives}
+
+    \include{ph_models}
+
+    \printbibliography
+\end{document}
