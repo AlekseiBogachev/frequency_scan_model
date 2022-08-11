@@ -1,4 +1,11 @@
-\documentclass{article}
+\documentclass[14pt]{extarticle}
+
+\usepackage{geometry}
+\geometry{a4paper,
+          total={165mm,257mm},
+          left=30mm,
+          top=20mm,
+         }
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1, T2A]{fontenc}
@@ -17,6 +24,8 @@
 
 \usepackage{subcaption}
 
+% \usepackage{amsmath}
+
 
 \title{Моделирование частотных сканов}
 \author{Богачев А.М.}
@@ -24,9 +33,15 @@
 
 
 \begin{document}
-    \maketitle
 
+    \maketitle
+    \begin{abstract}
+        Очередной отчёт с векторными графиками и вызывающе высоким
+        качеством вёрстки.
+    \end{abstract}
     \tableofcontents
+
+    \pagebreak
 
     \input{objectives}
 
@@ -35,5 +50,6 @@
     \input{modeling_and_results}
 
     \pagebreak
+    
     \printbibliography[heading=bibintoc]
 \end{document}

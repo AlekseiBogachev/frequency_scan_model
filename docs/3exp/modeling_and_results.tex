@@ -9,7 +9,7 @@
 
 	Модель частотного скана реализованна в виде отдельного класса \\
 	\emph{FrequencyScan()} в модуле \emph{fsmodels.py}. Код 
-	прокоментирован. Все параметры снабжены адекватными значениями по 
+	прокомментирован. Все параметры снабжены адекватными значениями по 
 	умолчанию. В дальнейшем планируется дополнение документации и 
 	перенос всех программных инструментов для обработки 
 	экспериментальных данных в один пакет.
@@ -24,18 +24,18 @@
 	Имеется возможность вывода значений параметров модели на каждой 
 	итерации при идентификации. Примеры использования модели можно найти
 	в файле \emph{tensorflow\_model.ipynb} (ПО Jupyter Notebook в составе 
-	дистрибудтива Anaconda).
+	дистрибутива Anaconda).
 
 	Программа при каждом вычислении значения $\phi\left(\tau,F_0,
-	t_1\right)$	(выражение \ref{eq:dls82e_model_phi}) находит 
-	\(
+	t_1\right)$	(выражение~\ref{eq:dls82e_model_phi}) находит 
+	\(%begin{equation*}
 		\max{\left[
 	    \tau F_0 e^{-\frac{0.05}{\tau F_0}}
 	    \left(1-e^{\frac{t_1 F_0-0.45}{\tau F_0}}
 	    -e^{-\frac{0.5}{\tau F_0}}+
 	    e^{\frac{t_1 F_0-0.95}{\tau F_0}}\right)
 	    \right]}
-    \)
+    \)%end{equation*}
 	методом	градиентного спуска и вычисляет масштабный множитель $M$ 
 	(выражение \ref{eq:dls82e_model_M}).
 
@@ -57,7 +57,7 @@
 	Градиентный спуск везде реализован с помощью библиотеки TensorFlow,
 	которая использует алгоритм дифференцирования на графе вычислений,
 	таким образом, производная берётся символьно (точно), затем вычисляется
-	её значение, по этому точность вычисления градиента ограничена только
+	её значение, поэтому точность вычисления градиента ограничена только
 	разрядностью чисел \cite{hands_on_ml}.
 
 	\textbf{Для ускорения процесса идентификации и улучшения сходимости
@@ -70,7 +70,7 @@
 	На рисунке \ref{pic:identification_test} показан пример результата
 	идентификации модели на тестовых (специально сгенерированных) данных.
 
-	\begin{figure}[ht]
+	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.75\textwidth]{identification_test}
 		\caption{Пример результата идентификации модели.}
@@ -82,27 +82,86 @@
 	отмечены значения параметров на каждой итерации, изолинии показывают 
 	значения среднеквадратической ошибки.
 
-	\begin{figure}[ht]
+	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=\textwidth]{path}
+		\includegraphics[width=0.75\textwidth]{path}
 		\caption{<<Путь>> изменеия параметров при идентификации.}
 		\label{pic:param_path}
 	\end{figure}
 
 
 	\subsection{Результаты моделирования в отсутствии шума}
-	\begin{figure}[ht]
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+	Много текста, посвящённого результатам моделирования.
+
+	\begin{figure}[h!]
 		\centering
-		\begin{subfigure}{\textwidth}
-			\includegraphics[width=0.9\linewidth]{identification_results_0}
+		\begin{subfigure}[c]{0.4\textwidth}
+			\includegraphics[width=\linewidth]{spectr0}
+			\caption{Спектр}
+			\label{pic:results_0_spectr}
+		\end{subfigure}
+		\begin{subfigure}[c]{0.55\textwidth}
+			\includegraphics[width=\linewidth]{identification_results_0}
 			\caption{Рассчитанный частотный скан и результаты идентификации}
 			\label{pic:results_0_scan}
 		\end{subfigure}
-		\begin{subfigure}{0.75\textwidth}
-			\includegraphics[width=0.9\linewidth]{spectr0}
-			\caption{Спектр}
-			\label{pic:results_0_spectr0}
-		\end{subfigure}
 		\caption{Пример №0}
 		\label{pic:result_0}
+	\end{figure}
+
+	\begin{figure}[h!]
+		\centering
+		\begin{subfigure}[c]{0.4\textwidth}
+			\includegraphics[width=\linewidth]{spectr17}
+			\caption{Спектр}
+			\label{pic:results_1_spectr}
+		\end{subfigure}
+		\begin{subfigure}[c]{0.55\textwidth}
+			\includegraphics[width=\linewidth]{identification_results_17}
+			\caption{Рассчитанный частотный скан и результаты идентификации}
+			\label{pic:results_1_scan}
+		\end{subfigure}
+		\caption{Пример №1}
+		\label{pic:result_1}
+	\end{figure}
+
+	\begin{figure}[h!]
+		\centering
+		\begin{subfigure}[c]{0.4\textwidth}
+			\includegraphics[width=\linewidth]{spectr30}
+			\caption{Спектр}
+			\label{pic:results_2_spectr}
+		\end{subfigure}
+		\begin{subfigure}[c]{0.55\textwidth}
+			\includegraphics[width=\linewidth]{identification_results_30}
+			\caption{Рассчитанный частотный скан и результаты идентификации}
+			\label{pic:results_2_scan}
+		\end{subfigure}
+		\caption{Пример №2}
+		\label{pic:result_2}
+	\end{figure}
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.75\textwidth]{semilogx_p_func}
+		\caption{Зависимость показателя $p$ от расстаяния между крайними
+		линиями на спектре.}
+		\label{pic:p_delta_tau}
 	\end{figure}
