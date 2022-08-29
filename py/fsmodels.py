@@ -842,6 +842,8 @@ class MultiExpFrequencyScan(tf.Module):
 
         self.n_exps = n_exps
 
+        self._fs_list = [FrequencyScan(tf_in_out=False)]*self._n_exps
+
         self.filling_pulse = filling_pulse
         self.exps_params = exps_params
 
@@ -849,6 +851,8 @@ class MultiExpFrequencyScan(tf.Module):
         self.n_iters = n_iters
         self.stop_val = stop_val
         self.verbose = verbose
+
+        
 
 
     def __call__(self, f_powers):
@@ -876,33 +880,14 @@ class MultiExpFrequencyScan(tf.Module):
 
         frequency_powers = tf.Variable(f_powers, dtype='float64')
 
-        # def get_one_exp_dlts(exp_params):
-        #     fs = FrequencyScan(time_constant_power=exp_params[0],
-        #                        amplitude=exp_params[1],
-        #                        filling_pulse=self._filling_pulse,
-        #                        tf_in_out = True
-        #                       )
-        #     return fs(frequency_powers)
-
-        # frequency_scans = tf.map_fn(fn=get_one_exp_dlts, 
-        #                             elems=self._exps_params)
-
-        # return tf.reduce_sum(frequency_scans, axis=0)
-
         dlts = tf.zeros_like(frequency_powers, dtype='float64')
 
-        for params in self._exps_params:
-            fs = FrequencyScan(time_constant_power=params[0],
-                               amplitude=params[1],
-                               filling_pulse=self._filling_pulse,
-                               tf_in_out = True
-                              )
-
-            dlts += fs(frequency_powers)
+        for i, (tc, amp) in enumerate(self._exps_params):
+            self._fs_list[i]._time_constant_power = tc
+            self._fs_list[i]._amplitude = amp
+            dlts +=self._fs_list[i](frequency_powers)
 
         return dlts
-
-
 
 
     def fit(self,
@@ -971,7 +956,7 @@ class MultiExpFrequencyScan(tf.Module):
                 predicted_dlts = self.__call__(frequency_powers)
                 current_loss = tf.reduce_mean(tf.square(dlts - predicted_dlts))
                 
-            dexps_params = tape.gradient(current_loss, [self._exps_params])
+            dexps_params = tape.gradient(current_loss, self._exps_params)
 
             fit_results.loc[_, 'exps_params'] = self._exps_params.numpy()
             fit_results.loc[_, 'loss'] = current_loss.numpy()     
@@ -979,7 +964,6 @@ class MultiExpFrequencyScan(tf.Module):
             if self._verbose:
                 print('iter #', _)
                 print('exps_params:\n',self.exps_params)
-                print('dexps_params:\n', dexps_params)
                 if self._tf_in_out:
                     print('Loss:', current_loss)
                 else:
@@ -989,6 +973,7 @@ class MultiExpFrequencyScan(tf.Module):
                 
             if self._stop_val is not None:
                 if tf.abs(current_loss - prev_loss) < self._stop_val:
+                    _ = self.__call__(frequency_powers)
                     break
                     
             prev_loss = current_loss
