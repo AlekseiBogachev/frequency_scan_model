@@ -675,7 +675,10 @@ class MultiExpFrequencyScan(tf.Module):
 
     @exps_params.setter
     def exps_params(self, val):
-        self._exps_params = tf.Variable(val, dtype='float64')
+        value = tf.Variable(val, dtype='float64')
+        if value.shape != [self._n_exps, 2]:
+            raise ValueError('The shape of exps_params must be equal to [n_exps, 2].')
+        self._exps_params = value
 
 
     @property
@@ -842,7 +845,7 @@ class MultiExpFrequencyScan(tf.Module):
 
         self.n_exps = n_exps
 
-        self._fs_list = [FrequencyScan(tf_in_out=False)]*self._n_exps
+        self._fs_list = [FrequencyScan(tf_in_out=False) for _ in range(self._n_exps)]
 
         self.filling_pulse = filling_pulse
         self.exps_params = exps_params
@@ -882,10 +885,10 @@ class MultiExpFrequencyScan(tf.Module):
 
         dlts = tf.zeros_like(frequency_powers, dtype='float64')
 
-        for i, (tc, amp) in enumerate(self._exps_params):
-            self._fs_list[i]._time_constant_power = tc
-            self._fs_list[i]._amplitude = amp
-            dlts +=self._fs_list[i](frequency_powers)
+        for scan, (tc, amp) in zip(self._fs_list, self._exps_params):
+            scan._time_constant_power = tc
+            scan._amplitude = amp
+            dlts += scan(frequency_powers)
 
         return dlts
 
