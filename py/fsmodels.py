@@ -59,16 +59,17 @@ class FrequencyScan(tf.Module):
     @property
     def time_constant_power(self):
         """Свойство, возвращающее текущее или принимающее новое значение
-        постоянной времени сгнала релаксации ёмкости в секундах.
+        десятичного логарифма от постоянной времени сгнала релаксации 
+        ёмкости в секундах.
 
         Parameters
         ----------
         val : float
-            Значение постоянной времени сигнала релаксации ёмкости. 
-            Может быть целым числом (int), числом с плавающей точкой 
-            (float), tf.Variable, tf.Tensor или объектом Python,
-            преобразуемым в tf.Tensor. Передаваемый объект должен иметь 
-            размерность (1,).
+            Значение десятичного логарифма от постоянной времени сигнала 
+            релаксации ёмкости. Может быть целым числом (int), числом с 
+            плавающей точкой (float), tf.Variable, tf.Tensor или объектом 
+            Python, преобразуемым в tf.Tensor. Передаваемый объект должен 
+            иметь размерность (1,).
 
         Returns
         -------
@@ -268,10 +269,10 @@ class FrequencyScan(tf.Module):
             единицах. Является начальным значением амплитуды при
             идентификации параметров модели.
         time_constant_power : float, default=-2.0
-            Значение постоянной времени сигнала релаксации ёмкости в 
-            секундах. Является начальным значением постоянной времени
-            сигнала релаксации ёмкости при идентификации параметров
-            модели.
+            Значение десятичного логарифма от постоянной времени сигнала 
+            релаксации ёмкости в секундах. Является начальным значением 
+            десятичного логарифма от постоянной времени сигнала 
+            релаксации ёмкости при идентификации параметров модели.
         filling_pulse : float, default=20*10**-6
             Значение длительности импульса заполнения в секундах. Не 
             изменяется во время идентификации.
@@ -563,6 +564,428 @@ class FrequencyScan(tf.Module):
             self._time_constant_power.assign_sub(self._learning_rate * dtime_const_pow)
             if self._fit_p_coef:
                 self._p_coef.assign_sub(self._learning_rate * dp_coef)
+                
+            if self._stop_val is not None:
+                if tf.abs(current_loss - prev_loss) < self._stop_val:
+                    break
+                    
+            prev_loss = current_loss
+            
+        return fit_results
+    
+    
+    
+class MultiExpFrequencyScan(tf.Module):
+    """Модель мультиэкспоненциального частотного скана.
+
+    Модель мультиэкспоненциального частотного скана. Модель позволяет 
+    вычислять частотный скан по заданным параметрам, а также 
+    идентифицировать параметры модели частотного скана по 
+    экспериментальным данным методом простого градиентного спуска.
+
+    Термин "мультиэкспоненциальный" подразумевает, что сигнал релаксации
+    ёмкости является суммой экспоненциальных сигналов релаксации, а 
+    модель имеет несколько наборов параметров экспоненциальных 
+    составляющих (амплитуда и частота).
+
+    """
+
+
+    @property
+    def filling_pulse(self):
+        """Свойство, возвращающее текущее или принимающее новое значение
+        длительности импульса заполнения в секундах.
+
+        Parameters
+        ----------
+        val : float
+            Значение длительности импульса заполнения. Может быть целым 
+            числом (int), числом с плавающей точкой (float),
+            tf.Variable, tf.Tensor или объектои Python, преобразуемым в 
+            tf.Tensor. Передаваемый объект должен иметь размерность 
+            (1,).
+
+        Returns
+        -------
+        numpy.float64 или tf.Varivable(dtype='float64')
+            Значение длительности импульса заполнения. Если свойство 
+            tf_in_out == False (значение по умолчанию), то возвращаемое
+            значение имеет тип numpy.float64. Если tf_in_out == True, 
+            то возвращаемое значение имеет тип tf.Varivable(dtype='float64').
+
+        """
+        if self._tf_in_out:
+            return self._filling_pulse
+        else:
+            return self._filling_pulse.numpy()
+
+    @filling_pulse.setter
+    def filling_pulse(self, val):
+        self._filling_pulse = tf.Variable(val, dtype='float64')
+
+
+    @property
+    def exps_params(self):
+        """Свойство, возвращающее текущий или принимающее новый вектор
+        параметров экспоненциальных составляющих сигнала релаксации 
+        ёмкости.
+
+        Parameters
+        ----------
+        val : array_like
+            Вектор параметров экспоненциальных составляющих сигнала 
+            релаксации ёмкости в формате 
+            [[time_constant_power_0, amplitude_0], 
+             [time_constant_power_1, amplitude_1], 
+             [time_constant_power_2, amplitude_2], 
+             ..., 
+             [time_constant_power_n, amplitude_n]], 
+            где time_constant_power_n - десятичный логарифм от значения 
+            постоянной времени сигнала релаксации ёмкости в секундах, 
+            amplitude_n - амплитуда сигнала релаксации в ёмкости в 
+            условных единицах.
+            Значения параметров могут быть целыми числами (int), числами 
+            с плавающей точкой (float), tf.Variable, tf.Tensor или 
+            объектами Python, преобразуемыми в tf.Tensor.
+
+        Returns
+        -------
+        numpy.float64 или tf.Varivable(dtype='float64')
+            Вектор параметров экспоненциальных составляющих сигнала 
+            релаксации ёмкости в формате 
+            [[time_constant_power_0, amplitude_0], 
+             [time_constant_power_1, amplitude_1], 
+             [time_constant_power_2, amplitude_2], 
+             ..., 
+             [time_constant_power_n, amplitude_n]], 
+            где time_constant_power_n - десятичный логарифм от значения 
+            постоянной времени сигнала релаксации ёмкости в секундах, 
+            amplitude_n - амплитуда сигнала релаксации в ёмкости в 
+            условных единицах.
+            Если свойство tf_in_out == False (значение по умолчанию), то 
+            возвращаемое значение имеет тип numpy.float64. Если 
+            tf_in_out == True, то возвращаемое значение имеет тип 
+            tf.Varivable(dtype='float64').
+
+        """
+        if self._tf_in_out:
+            return self._exps_params
+        else:
+            return self._exps_params.numpy()
+
+    @exps_params.setter
+    def exps_params(self, val):
+        self._exps_params = tf.Variable(val, dtype='float64')
+
+
+    @property
+    def n_exps(self):
+        """int: количество экспоненциальных составляющих в сигнале 
+        релаксации ёмкости."""
+        return self._n_exps
+
+    @n_exps.setter
+    def n_exps(self, val):
+        self._n_exps = val
+
+
+    @property
+    def learning_rate(self):
+        """float: Скорость градиентного спуска."""
+        return self._learning_rate
+
+    @learning_rate.setter
+    def learning_rate(self, val):
+        self._learning_rate = val
+    
+
+    @property
+    def n_iters(self):
+        """int: максимальное количество итераций при идентификации модели."""
+        return self._n_iters
+
+    @n_iters.setter
+    def n_iters(self, val):
+        self._n_iters = val
+
+
+    @property
+    def stop_val(self):
+        """float: Минимальное значение разницы в среднеквадратической ошибке.
+        
+        Если stop_val не None (значение по умолчанию), то идентификация
+        останавливается, когда модуль разницы между среднеквадратической
+        ошибкой на предыдущей и текущей итерациях меньше stop_val.
+
+        """
+        return self._stop_val
+
+    @stop_val.setter
+    def stop_val(self, val):
+        self._stop_val = val
+
+
+    @property
+    def verbose(self):
+        """bool: Вывод дополнительной информации.
+
+        Если True - выводится дополнительная информация при 
+        идентификации параметров модели.
+
+        Дополнительная информация выводится в консоль и имеет следующий 
+        вид:
+        iter # номер итерации
+        amp: значение амплитуды процесса релаксации
+        tau: значение постоянной времени процесса релаксации
+        p: значение коэффициента p
+        Loss: значение среднеквадратической ошибки
+
+        """
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, val):
+        self._verbose = val
+
+        
+    @property
+    def tf_in_out(self):
+        """bool: Флаг, определяющий тип выводимых параметров модели.
+
+        Если True, то значения, возвращаемые свойствами amplitude, 
+        time_constant_power, filling_pulse, p_coef имеют тип 
+        tf.Varivable(dtype='float64'), иначе numpy.float64.
+
+        """
+        return self._tf_in_out
+
+    @tf_in_out.setter
+    def tf_in_out(self, val):
+        self._tf_in_out = val
+    
+
+    def __init__(self,
+                 
+                 n_exps=1,
+                 filling_pulse = 20*10**-6,
+                 
+                 exps_params=[[-2.0, 3.5]],
+                 
+                 learning_rate = 0.1,
+                 n_iters = 1000,
+                 stop_val = None,
+                 verbose = False,
+
+                 tf_in_out = False,
+                 
+                 **kwargs):
+        """Инициализация модели моноэкспоненциального частотного скана.
+        
+        Parameters
+        ----------
+        n_exps : int, default=1
+            Количество экспоненциальных составляющих в сигнале
+            релаксации ёмкости.
+        filling_pulse : float, default=20*10**-6
+            Значение длительности импульса заполнения в секундах. Не 
+            изменяется во время идентификации.
+        exps_params : array_like, default=[-2.0, 3.5]
+            Вектор параметров экспоненциальных составляющих сигнала 
+            релаксации ёмкости в формате 
+            [[time_constant_power_0, amplitude_0], 
+             [time_constant_power_1, amplitude_1], 
+             [time_constant_power_2, amplitude_2], 
+             ..., 
+             [time_constant_power_n, amplitude_n]], 
+            где time_constant_power_n - десятичный логарифм от значения 
+            постоянной времени сигнала релаксации ёмкости в секундах, 
+            amplitude_n - амплитуда сигнала релаксации в ёмкости в 
+            условных единицах.
+        learning_rate : float, default=0.1
+            Скорость градиентного спуска.
+        n_iters : int, default=1000
+            Максимальное количество итераций при идентификации 
+            параметров модели.
+        stop_val : float, default=None
+            Минимальное изменение среднеквадратической ошибки при
+            идентификации. Данное значение необходимо для ранней остановки
+            алгоритма идентификации параметров. Если stop_val является 
+            None, то выполняется заданное максимальное количество итераций.
+            Если задано другое значение, то идентификация останавливается,
+            когда значение модуля разности текущей и пердшествующей
+            среднеквадратической ошибки становится меньше stop_val. В
+            псевдокоде условие остановки идентификации можно записать
+            следующим образом:
+            abs(previous_mse - current_mse) < stop_val.
+        verbose : bool, default=False
+            Если verbose == True, то при идентификации в консоль выводится
+            дополнительная информация, имеющая следущий вид:
+                iter # номер итерации
+                amp: значение амплитуды процесса релаксации
+                tau: значение постоянной времени процесса релаксации
+                p: значение коэффициента p
+                Loss: значение среднеквадратической ошибки
+        tf_in_out : bool, default=False
+            Флаг, определяющий тип выводимых параметров модели.
+            Если True, то значения, возвращаемые свойствами amplitude, 
+            time_constant_power, filling_pulse, p_coef имеют тип 
+            tf.Varivable(dtype='float64'), иначе numpy.float64.
+        **kwargs
+            Дополнительные аргументы, определяемые классом родителем 
+            tf.Module.
+
+        """
+
+        super().__init__(**kwargs)
+
+        self.tf_in_out = tf_in_out
+
+        self.n_exps = n_exps
+
+        self.filling_pulse = filling_pulse
+        self.exps_params = exps_params
+
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.stop_val = stop_val
+        self.verbose = verbose
+
+
+    def __call__(self, f_powers):
+        """Значение сигнала DLTS.
+
+        Метод вычисляет сигнал DLTS - сигнал на выходе коррелятора 
+        спектрометра DLS-82E - для каждого значения в массиве f_powers.
+
+        Parameters
+        ----------
+        f_powers : array_like
+            Одномерный массив, содержащий значения десятичных логарифмов
+            частоты  точек на частотном скане. Данный параметр также может 
+            быть целым числом (int) или числом с плавающей точкой (float), а
+            также tf.Tensor или любым объектом Python, который может быть
+            преобразован в tf.Tensor. Логарифм берётся от частоты в Гц.
+
+        Returns
+        -------
+        tf.Tensor 
+            сигнал на выходе коррелятора спектрометра DLS-82E для каждого
+            значения в массиве f_powers.
+
+        """
+
+        frequency_powers = tf.Variable(f_powers, dtype='float64')
+
+        # def get_one_exp_dlts(exp_params):
+        #     fs = FrequencyScan(time_constant_power=exp_params[0],
+        #                        amplitude=exp_params[1],
+        #                        filling_pulse=self._filling_pulse,
+        #                        tf_in_out = True
+        #                       )
+        #     return fs(frequency_powers)
+
+        # frequency_scans = tf.map_fn(fn=get_one_exp_dlts, 
+        #                             elems=self._exps_params)
+
+        # return tf.reduce_sum(frequency_scans, axis=0)
+
+        dlts = tf.zeros_like(frequency_powers, dtype='float64')
+
+        for params in self._exps_params:
+            fs = FrequencyScan(time_constant_power=params[0],
+                               amplitude=params[1],
+                               filling_pulse=self._filling_pulse,
+                               tf_in_out = True
+                              )
+
+            dlts += fs(frequency_powers)
+
+        return dlts
+
+
+
+
+    def fit(self,
+            f_powers,
+            dlts_vals,
+           ):
+        """Идентификация параметров модели.
+
+        Метод находит оптимальные параметры модели при помощи градиентного
+        спуска. 
+        Градиент вычисляется при помощи библиотеки TensorFlow. 
+        Функция ошибки - среднеквадратическое отклонение между 
+        экспериментальными данными и моделью, соответственно алгоритм ищет 
+        значения параметров модели при которых достигается минимум этой 
+        функции.
+        Реализована ранняя остановка алгоритма (определяется свойством 
+        stop_val): алгоритм останавливается, если модуль разницы между
+        значениями функции ошибки на текущей и предыдущей итерациях становится
+        меньше заданного значения.
+        Реализован вывод дополнительных данных в консоль для контроля процесса
+        идентификации (определяется свойством verbose). Данные, выводимые в 
+        консоль имеют следующий вид:
+            iter # номер итерации
+            exps_params: Вектор параметров экспоненциальных составляющих 
+            сигнала релаксации ёмкости в формате 
+            [[time_constant_power_0, amplitude_0], 
+             [time_constant_power_1, amplitude_1], 
+             [time_constant_power_2, amplitude_2], 
+             ..., 
+             [time_constant_power_n, amplitude_n]], 
+            где time_constant_power_n - десятичный логарифм от значения 
+            постоянной времени сигнала релаксации ёмкости в секундах, 
+            amplitude_n - амплитуда сигнала релаксации в ёмкости в 
+            условных единицах.
+            Loss: значение среднеквадратической ошибки
+
+        Parameters
+        ----------
+        f_powers : array_like
+            Одномерный массив, содержащий значения десятичных логарифмов
+            частоты на частотном скане (экспериментальных данных). Логарифм
+            берётся от частоты в Гц.
+        dlts_vals : array_like
+            Одномерный массив, содержащий значения сигнала DLTS точек на 
+            частотном скане (экспериментальных данных). Значения сигнала DLTS
+            имеют ту же единицу измерения (тот же масштаб), что и амплитуда
+            сигнала релаксации ёмкости (одни из параметров данной модели).
+
+        Returns
+        -------
+        fit_results : pd.DataFrame
+            pd.DataFrame с параметрами модели и значениями функции ошибки на
+            каждой итерации.
+
+        """
+        frequency_powers = tf.Variable(f_powers, dtype='float64')
+        dlts = tf.Variable(dlts_vals, dtype='float64')
+
+        
+        prev_loss = tf.Variable(np.inf, dtype='float64')
+        
+        fit_results = pd.DataFrame(columns=['exps_params', 'loss'])
+        
+        for _ in range(self._n_iters):
+            with tf.GradientTape() as tape:
+                predicted_dlts = self.__call__(frequency_powers)
+                current_loss = tf.reduce_mean(tf.square(dlts - predicted_dlts))
+                
+            dexps_params = tape.gradient(current_loss, [self._exps_params])
+
+            fit_results.loc[_, 'exps_params'] = self._exps_params.numpy()
+            fit_results.loc[_, 'loss'] = current_loss.numpy()     
+            
+            if self._verbose:
+                print('iter #', _)
+                print('exps_params:\n',self.exps_params)
+                print('dexps_params:\n', dexps_params)
+                if self._tf_in_out:
+                    print('Loss:', current_loss)
+                else:
+                    print('Loss:', current_loss.numpy())
+                
+            self._exps_params.assign_sub(self._learning_rate * dexps_params)
                 
             if self._stop_val is not None:
                 if tf.abs(current_loss - prev_loss) < self._stop_val:
