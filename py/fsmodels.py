@@ -952,7 +952,7 @@ class MultiExpFrequencyScan(tf.Module):
         
         prev_loss = tf.Variable(np.inf, dtype='float64')
         
-        fit_results = pd.DataFrame(columns=['exps_params', 'loss'])
+        fit_results = pd.DataFrame(columns=['loss', 'n_exps'])
         
         for _ in range(self._n_iters):
             with tf.GradientTape() as tape:
@@ -961,8 +961,11 @@ class MultiExpFrequencyScan(tf.Module):
                 
             dexps_params = tape.gradient(current_loss, self._exps_params)
 
-            fit_results.loc[_, 'exps_params'] = self._exps_params.numpy()
-            fit_results.loc[_, 'loss'] = current_loss.numpy()     
+            for i, (tc_pow, ampl) in enumerate(self._exps_params.numpy()):
+                fit_results.loc[_, f'time_constatn_power_{i}'] = tc_pow
+                fit_results.loc[_, f'amplitude_{i}'] = ampl
+            fit_results.loc[_, 'loss'] = current_loss.numpy() 
+            fit_results.loc[_, 'n_exps'] = self._n_exps
             
             if self._verbose:
                 print('iter #', _)
