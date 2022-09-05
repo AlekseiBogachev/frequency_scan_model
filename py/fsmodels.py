@@ -436,7 +436,7 @@ class FrequencyScan(tf.Module):
         return 1 / self._get_phi(max_freq_pow)
         
         
-    def __call__(self, f_powers):
+    def _get_dlts(self, f_powers):
         """Значение сигнала DLTS.
 
         Метод вычисляет сигнал DLTS - сигнал на выходе коррелятора 
@@ -475,6 +475,13 @@ class FrequencyScan(tf.Module):
         phi = self._get_phi(frequency_powers)
         
         return self._amplitude * tf.pow(M * phi, self._p_coef)
+
+
+    def __call__(self, f_powers):
+        if self._tf_in_out:
+            return self._get_dlts(f_powers)
+        else:
+            return self._get_dlts(f_powers).numpy()
     
     
     def fit(self,
@@ -535,7 +542,7 @@ class FrequencyScan(tf.Module):
         
         for _ in range(self._n_iters):
             with tf.GradientTape() as tape:
-                predicted_dlts = self.__call__(frequency_powers)
+                predicted_dlts = self._get_dlts(frequency_powers)
                 current_loss = tf.reduce_mean(tf.square(dlts - predicted_dlts))
                 
             if self._fit_p_coef:
@@ -845,7 +852,7 @@ class MultiExpFrequencyScan(tf.Module):
 
         self.n_exps = n_exps
 
-        self._fs_list = [FrequencyScan(tf_in_out=False) for _ in range(self._n_exps)]
+        self._fs_list = [FrequencyScan() for _ in range(self._n_exps)]
 
         self.filling_pulse = filling_pulse
         self.exps_params = exps_params
@@ -858,7 +865,7 @@ class MultiExpFrequencyScan(tf.Module):
         
 
 
-    def __call__(self, f_powers):
+    def _get_dlts(self, f_powers):
         """Значение сигнала DLTS.
 
         Метод вычисляет сигнал DLTS - сигнал на выходе коррелятора 
@@ -888,9 +895,16 @@ class MultiExpFrequencyScan(tf.Module):
         for scan, (tc, amp) in zip(self._fs_list, self._exps_params):
             scan._time_constant_power = tc
             scan._amplitude = amp
-            dlts += scan(frequency_powers)
+            dlts += scan._get_dlts(frequency_powers)
 
         return dlts
+
+
+    def __call__(self, f_powers):
+        if self._tf_in_out:
+            return self._get_dlts(f_powers)
+        else:
+            return self._get_dlts(f_powers).numpy()
 
 
     def fit(self,
@@ -956,7 +970,7 @@ class MultiExpFrequencyScan(tf.Module):
         
         for _ in range(self._n_iters):
             with tf.GradientTape() as tape:
-                predicted_dlts = self.__call__(frequency_powers)
+                predicted_dlts = self._get_dlts(frequency_powers)
                 current_loss = tf.reduce_mean(tf.square(dlts - predicted_dlts))
                 
             dexps_params = tape.gradient(current_loss, self._exps_params)
