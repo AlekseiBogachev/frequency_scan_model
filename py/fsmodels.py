@@ -862,8 +862,6 @@ class MultiExpFrequencyScan(tf.Module):
         self.stop_val = stop_val
         self.verbose = verbose
 
-        
-
 
     def _get_dlts(self, f_powers):
         """Значение сигнала DLTS.
