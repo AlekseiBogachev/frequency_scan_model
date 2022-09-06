@@ -4,6 +4,7 @@
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator, RegressorMixin
 import tensorflow as tf
 
 
@@ -997,3 +998,106 @@ class MultiExpFrequencyScan(tf.Module):
             prev_loss = current_loss
             
         return fit_results
+    
+    
+class SklMultiExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
+
+    @property
+    def exps_params_(self):
+        return self._exps_params.numpy()
+
+    @exps_params_.setter
+    def exps_params_(self, val):
+        value = tf.Variable(val, dtype='float64')
+        if value.shape != [self.n_exps, 2]:
+            raise ValueError('The shape of exps_params must be equal to [n_exps, 2].')
+        self._exps_params = value
+        
+        f_pulse = tf.Variable(self.filling_pulse, dtype='float64')
+        self._fs_list = [FrequencyScan(filling_pulse=f_pulse) for _ in range(self.n_exps)]
+        
+        
+    @property
+    def fit_results_(self):
+        return self._fit_results
+    
+
+    def __init__(self,
+                 
+                 n_exps=1,
+                 filling_pulse=20*10**-6,
+                 
+                 learning_rate = 0.1,
+                 n_iters = 1000,
+                 stop_val = None,
+                 verbose = False):
+        
+        super().__init__()
+
+        self.n_exps = n_exps
+        self.filling_pulse = filling_pulse
+
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.stop_val = stop_val
+        self.verbose = verbose
+
+
+    def _get_dlts(self, f_powers):
+        
+        frequency_powers = tf.Variable(f_powers, dtype='float64')
+
+        dlts = tf.zeros_like(frequency_powers, dtype='float64')
+
+        for scan, (tc, amp) in zip(self._fs_list, self._exps_params):
+            scan._time_constant_power = tc
+            scan._amplitude = amp
+            dlts += scan._get_dlts(frequency_powers)
+
+        return dlts
+
+
+    def fit(self, X, y):
+        
+        self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), 1.0] for _ in range(self.n_exps)]
+        
+        frequency_powers = tf.Variable(X, dtype='float64')
+        dlts = tf.Variable(y, dtype='float64')
+
+        prev_loss = tf.Variable(np.inf, dtype='float64')
+        
+        self._fit_results = pd.DataFrame(columns=['n_exps', 'filling_pulse', 'loss'])
+        
+        for _ in range(self.n_iters):
+            with tf.GradientTape() as tape:
+                predicted_dlts = self._get_dlts(frequency_powers)
+                current_loss = tf.reduce_mean(tf.square(dlts - predicted_dlts))
+                
+            dexps_params = tape.gradient(current_loss, self._exps_params)
+
+            for i, (tc_pow, ampl) in enumerate(self._exps_params.numpy()):
+                self._fit_results.loc[_, f'time_constatn_power_{i}'] = tc_pow
+                self._fit_results.loc[_, f'amplitude_{i}'] = ampl
+                
+            self._fit_results.loc[_, 'loss'] = current_loss.numpy() 
+            self._fit_results.loc[_, 'n_exps'] = self.n_exps
+            self._fit_results.loc[_, 'filling_pulse'] = self.filling_pulse
+            
+            if self.verbose:
+                print('iter #', _)
+                print('exps_params:\n',self.exps_params_)
+                print('Loss:', current_loss.numpy())
+                
+            self._exps_params.assign_sub(self.learning_rate * dexps_params)
+                
+            if self.stop_val is not None:
+                if tf.abs(current_loss - prev_loss) < self.stop_val:
+                    break
+                    
+            prev_loss = current_loss
+            
+        return self
+    
+    
+    def predict(self, X):
+        return self._get_dlts(f_powers=X).numpy()
