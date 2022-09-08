@@ -1076,7 +1076,7 @@ class SklMultiExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
             dexps_params = tape.gradient(current_loss, self._exps_params)
 
             for i, (tc_pow, ampl) in enumerate(self._exps_params.numpy()):
-                self._fit_results.loc[_, f'time_constatn_power_{i}'] = tc_pow
+                self._fit_results.loc[_, f'time_constant_power_{i}'] = tc_pow
                 self._fit_results.loc[_, f'amplitude_{i}'] = ampl
                 
             self._fit_results.loc[_, 'loss'] = current_loss.numpy() 
