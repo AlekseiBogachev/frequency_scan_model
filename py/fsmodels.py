@@ -1097,13 +1097,8 @@ class SklSingleExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
     def _get_dlts(self, f_powers):
         frequency_powers = tf.Variable(f_powers, dtype='float64')
         
-#         M = self._get_M(learning_rate=0.2,
-#                         n_iters=100,
-#                         stop_val = 10**-10)
-        
         phi = self._get_phi(frequency_powers)
         
-#         return self._exps_params[1] * tf.pow(M * phi, self._p_coef)
         return self._exps_params[1] * tf.pow(self.M * phi, self._p_coef)
     
     
@@ -1144,7 +1139,7 @@ class SklSingleExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
                 print('p:', self._p_coef.numpy())
                 print('Loss:', current_loss.numpy())
             
-            self._exps_params.assign_sub(self.learning_rate * dexps_params)
+            self.exps_params_ = self._exps_params - self.learning_rate * dexps_params
             if self.fit_p_coef:
                 self._p_coef.assign_sub(self.learning_rate * dp_coef)
                 
