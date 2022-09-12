@@ -1175,7 +1175,8 @@ class SklMultiExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
         self._exps_params = value
         
         f_pulse = tf.Variable(self.filling_pulse, dtype='float64')
-        self._fs_list = [FrequencyScan(filling_pulse=f_pulse) for _ in range(self.n_exps)]
+        self._fs_list = [SklSingleExpFrequencyScan(filling_pulse=f_pulse, 
+            fit_p_coef=False) for _ in range(self.n_exps)]
         
         
     @property
@@ -1210,10 +1211,10 @@ class SklMultiExpFrequencyScan(tf.Module, BaseEstimator, RegressorMixin):
 
         dlts = tf.zeros_like(frequency_powers, dtype='float64')
 
-        for scan, (tc, amp) in zip(self._fs_list, self._exps_params):
-            scan._time_constant_power = tc
-            scan._amplitude = amp
-            dlts += scan._get_dlts(frequency_powers)
+        for fs, exps_params in zip(self._fs_list, self._exps_params):
+            fs.p_coef_ = 1.0
+            fs.exps_params_ = exps_params
+            dlts += fs._get_dlts(frequency_powers)
 
         return dlts
 
