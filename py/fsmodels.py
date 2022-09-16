@@ -123,7 +123,7 @@ class BaseModel(BaseEstimator, RegressorMixin):
         fit_result['loss'] = loss.numpy()
         
         for i, exp_param in enumerate(self.exps_params_):
-            fit_result[f'time_constant_{i}'] = exp_param[0]
+            fit_result[f'time_constant_pow_{i}'] = exp_param[0]
             fit_result[f'amplitude_{i}'] = exp_param[1]
             
         try:
