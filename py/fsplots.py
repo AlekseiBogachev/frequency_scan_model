@@ -4,28 +4,6 @@ import pandas as pd
 from fsmodels import SklSingleExpFrequencyScan
 
 
-def plot_spectr(exps_params_, xlim=[1/2500, 1], ylim=None):
-    fig, ax = plt.subplots(1,1)
-
-    exps_params = np.c_[np.power(10.0, exps_params_[:, 0]), 
-                        exps_params_[:, 1]]
-    
-    for TC, AMP in exps_params:
-        ax.semilogx([TC, TC], [0, AMP], '-b')
-        
-    ax.set_title('Спектр')
-    ax.set_xlabel('Постоянная времени, с')
-    ax.set_ylabel('Амплитуда')
-    ax.grid()
-
-    if xlim is not None:
-        ax.set_xlim(xlim)
-    if ylim is not None:
-        ax.set_ylim(ylim)
-    
-    return fig, ax
-
-
 def _get_y(X, model_class, **model_params):
     
     if 'n_exps' in model_params.keys():
@@ -62,6 +40,28 @@ def _get_params_fom_iter(iter, fit_results_):
         model_params['n_exps'] = n_exps
     
     return model_params
+
+
+def plot_spectr(exps_params_, xlim=[1/2500, 1], ylim=None):
+    fig, ax = plt.subplots(1,1)
+
+    exps_params = np.c_[np.power(10.0, exps_params_[:, 0]), 
+                        exps_params_[:, 1]]
+    
+    for TC, AMP in exps_params:
+        ax.semilogx([TC, TC], [0, AMP], '-b')
+        
+    ax.set_title('Спектр')
+    ax.set_xlabel('Постоянная времени, с')
+    ax.set_ylabel('Амплитуда')
+    ax.grid()
+
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    if ylim is not None:
+        ax.set_ylim(ylim)
+    
+    return fig, ax
 
 
 def plot_perfect_scan(X, exps_params_, f_pulse, label, marker='-.'):
@@ -104,5 +104,50 @@ def plot_model(X, y, model_class, fit_results_, plot_exps=True):
     ax.set_title('Результаты идентификации')
     ax.set_xlabel(r'$\log_{10}(F_0), \log_{10}(Гц)$')
     ax.set_ylabel('Сигнал DLTS, условные единицы')
+    
+    return fig, ax
+    
+    
+def plot_loss_path(fit_results_):
+    
+    loss_path = fit_results_.loss.to_numpy()
+    
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    
+    path = loss_path / loss_path.max()
+    
+    ax.plot(path)
+    
+    ax.grid()
+    ax.set_ylim([0,1])
+    ax.set_xlim([0, path.shape[0]])
+    ax.set_ylabel('Нормализованная среднеквадратическая ошибка')
+    ax.set_xlabel('Номер итерации')
+    ax.set_title('Значения среднеквадратической \nошибки в процессе идентификации')
+    
+    return fig, ax
+    
+    
+def plot_deviations(X, y_true, y_pred):
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 7))
+    ax.stem(X, (y_true - y_pred))
+    ax.grid()
+    ax.set_title('Oтклонения модели от экспериментальных данных')
+    ax.set_xlabel(r'$\log10(F_0), \log10($Гц$)$')
+    ax.set_ylabel('Сигнал DLTS, условные единицы')
+    
+    return fig, ax
+    
+    
+def plot_experimental_points(X, y, style='og', alpha=0.3):
+    
+    fig, ax = plt.subplots(1, 1)
+    
+    ax.plot(X, y, style, alpha=alpha)
+    ax.set_title('Экспериментальные данные')
+    ax.set_xlabel(r'$\log10(F_0), \log10($Гц$)$')
+    ax.set_ylabel('Сигнал DLTS, условные единицы')
+    ax.grid()
     
     return fig, ax
