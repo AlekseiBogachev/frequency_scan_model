@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from fsmodels import SklSingleExpFrequencyScan
 
 
@@ -32,7 +33,7 @@ def _get_y(X, model_class, **model_params):
                             n_exps = model_params['n_exps'])
     else:
         model = model_class(filling_pulse = model_params['filling_pulse'])
-    
+
     model.exps_params_ = model_params['exps_params_']
     
     if hasattr(model_class, 'p_coef_'):
@@ -47,10 +48,10 @@ def _get_params_fom_iter(iter, fit_results_):
 
     n_exps = selected_row['n_exps']
 
-    exps_params_ = [selected_row[[f'time_constant_pow_{i}', f'amplitude_{i}']].to_numpy() 
-                    for i in range(n_exps)]
-
-    exps_params_ = np.concatenate(exps_params_)
+    col_pairs = [[f'time_constant_pow_{i}', f'amplitude_{i}'] 
+                 for i in range(n_exps)]
+                 
+    exps_params_ = np.stack([selected_row[pair].to_numpy() for pair in col_pairs])
 
     model_params = dict(filling_pulse = selected_row['filling_pulse'],
                         exps_params_ = exps_params_)
@@ -66,11 +67,12 @@ def _get_params_fom_iter(iter, fit_results_):
 def plot_perfect_scan(X, exps_params_, f_pulse, label, marker='-.'):
     fs = SklSingleExpFrequencyScan(filling_pulse = f_pulse)
     fs.exps_params_ = exps_params_
+    fs.p_coef_ = 1.0
     y = fs.predict(X)
     plt.plot(X, y, marker, label=label)
 
 
-def plot_model(X, y, model_class, fit_results_, plot_perfection=True):
+def plot_model(X, y, model_class, fit_results_, plot_exps=True):
 
     initial_params = _get_params_fom_iter(0, fit_results_)
     initial_dlts = _get_y(X, model_class, **initial_params)
@@ -84,10 +86,10 @@ def plot_model(X, y, model_class, fit_results_, plot_perfection=True):
     ax.plot(X, initial_dlts, '-b', label='Начальная модель')
     ax.plot(X, final_dlts, '-r', label='Модель после идентификации')
 
-    if plot_perfection:
+    if plot_exps:
         for i, params in enumerate(final_params['exps_params_']):
             plot_perfect_scan(X, 
-                              params, 
+                              [params], 
                               final_params['filling_pulse'], 
                               label=f'exp{i}'
                              )

@@ -106,7 +106,7 @@ class BaseModel(BaseEstimator, RegressorMixin):
                         value.shape[1] == 2)
         
         if condition:
-            raise ValueError('The shape of exps_params must be equal [to n_exps, 2], ' + 
+            raise ValueError('The shape of exps_params must be equal to [n_exps, 2], ' + 
                              f'specifically {[self.n_exps, 2]}.')
         self._exps_params = value
         self._update_M()
