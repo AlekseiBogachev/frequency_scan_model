@@ -198,6 +198,7 @@ class SklSingleExpFrequencyScan(BaseModel):
     def fit(self, X, y):
         
         self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), np.random.uniform(low=-1, high=1)]]
+        self._update_M()
         self.p_coef_ = 1.0
         
         frequency_powers = tf.Variable(X, dtype='float64')
@@ -291,6 +292,7 @@ class SklMultiExpFrequencyScan(BaseModel):
         self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), 
                               np.random.uniform(low=-1/self.n_exps, high=1/self.n_exps)] 
                              for _ in range(self.n_exps)]
+        self._update_M()
         
         for i in range(self.n_iters):
             with tf.GradientTape() as tape:
