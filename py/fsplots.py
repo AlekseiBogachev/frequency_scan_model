@@ -42,8 +42,11 @@ def _get_params_fom_iter(iter, fit_results_):
     return model_params
 
 
-def plot_spectr(exps_params_, xlim=[1/2500, 1], ylim=None):
-    fig, ax = plt.subplots(1,1)
+def plot_spectr(exps_params_, ax=None, xlim=[1/2500, 1], ylim=None):
+    
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1,1)
 
     exps_params = np.c_[np.power(10.0, exps_params_[:, 0]), 
                         exps_params_[:, 1]]
@@ -61,18 +64,28 @@ def plot_spectr(exps_params_, xlim=[1/2500, 1], ylim=None):
     if ylim is not None:
         ax.set_ylim(ylim)
     
-    return fig, ax
+    if axes_flag:
+        return fig, ax
+    return ax
 
 
-def plot_perfect_scan(X, exps_params_, f_pulse, label, marker='-.'):
+def plot_perfect_scan(X, exps_params_, f_pulse, label, ax=None, marker='-.'):
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1,1)
+
     fs = SklSingleExpFrequencyScan(filling_pulse = f_pulse)
     fs.exps_params_ = exps_params_
     fs.p_coef_ = 1.0
     y = fs.predict(X)
-    plt.plot(X, y, marker, label=label)
+    ax.plot(X, y, marker, label=label)
+
+    if axes_flag:
+        return fig, ax
+    return ax
 
 
-def plot_model(X, y, model_class, fit_results_, plot_exps=True):
+def plot_model(X, y, model_class, fit_results_, ax=None, plot_exps=True):
 
     initial_params = _get_params_fom_iter(0, fit_results_)
     initial_dlts = _get_y(X, model_class, **initial_params)
@@ -80,7 +93,9 @@ def plot_model(X, y, model_class, fit_results_, plot_exps=True):
     final_params = _get_params_fom_iter(-1, fit_results_)
     final_dlts = _get_y(X, model_class, **final_params)
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 7))
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1, 1, figsize=(10, 7))
 
     ax.plot(X, y, 'og', alpha=0.3, label='Экспериментальные данные')
     ax.plot(X, initial_dlts, '-b', label='Начальная модель')
@@ -98,21 +113,23 @@ def plot_model(X, y, model_class, fit_results_, plot_exps=True):
     ax.grid()
     ax.set_xlim([0, 3.5])
     ylim = ax.get_ylim()
-    ylim = [np.floor(ylim[0]), np.ceil(ylim[1])]
-    ax.set_ylim(ylim)
     
     ax.set_title('Результаты идентификации')
     ax.set_xlabel(r'$\log_{10}(F_0), \log_{10}(Гц)$')
     ax.set_ylabel('Сигнал DLTS, условные единицы')
     
-    return fig, ax
+    if axes_flag:
+        return fig, ax
+    return ax
     
     
-def plot_loss_path(fit_results_):
+def plot_loss_path(fit_results_, ax=None):
+
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     
     loss_path = fit_results_.loss.to_numpy()
-    
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     
     path = loss_path / loss_path.max()
     
@@ -125,10 +142,16 @@ def plot_loss_path(fit_results_):
     ax.set_xlabel('Номер итерации')
     ax.set_title('Значения среднеквадратической \nошибки в процессе идентификации')
     
-    return fig, ax
+    if axes_flag:
+        return fig, ax
+    return ax
     
     
-def plot_deviations(X, y_true, y_pred):
+def plot_deviations(X, y_true, y_pred, ax=None):
+
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1, 1)
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 7))
     ax.stem(X, (y_true - y_pred))
@@ -137,12 +160,16 @@ def plot_deviations(X, y_true, y_pred):
     ax.set_xlabel(r'$\log10(F_0), \log10($Гц$)$')
     ax.set_ylabel('Сигнал DLTS, условные единицы')
     
-    return fig, ax
+    if axes_flag:
+        return fig, ax
+    return ax
     
     
-def plot_experimental_points(X, y, style='og', alpha=0.3):
+def plot_experimental_points(X, y, style='og', alpha=0.3, ax=None):
     
-    fig, ax = plt.subplots(1, 1)
+    axes_flag = ax is None
+    if axes_flag:
+        fig, ax = plt.subplots(1, 1)
     
     ax.plot(X, y, style, alpha=alpha)
     ax.set_title('Экспериментальные данные')
@@ -150,4 +177,6 @@ def plot_experimental_points(X, y, style='og', alpha=0.3):
     ax.set_ylabel('Сигнал DLTS, условные единицы')
     ax.grid()
     
-    return fig, ax
+    if axes_flag:
+        return fig, ax
+    return ax
