@@ -103,11 +103,12 @@ def plot_model(X, y, model_class, fit_results_, ax=None, plot_exps=True):
 
     if plot_exps:
         for i, params in enumerate(final_params['exps_params_']):
-            plot_perfect_scan(X, 
-                              [params], 
-                              final_params['filling_pulse'], 
-                              label=f'exp{i}'
-                             )
+            ax = plot_perfect_scan(X, 
+                                   [params], 
+                                   final_params['filling_pulse'], 
+                                   label=f'exp{i}',
+                                   ax=ax
+                                  )
 
     ax.legend()
     ax.grid()
