@@ -154,7 +154,6 @@ def plot_deviations(X, y_true, y_pred, ax=None):
     if axes_flag:
         fig, ax = plt.subplots(1, 1)
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 7))
     ax.stem(X, (y_true - y_pred))
     ax.grid()
     ax.set_title('Oтклонения модели от экспериментальных данных')
