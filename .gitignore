@@ -1,7 +1,8 @@
 /miscellaneous
-/dataset
-/models
-/plots
+/dataset/**/*.csv
+/models/**/*.csv
+/plots/**/*.pdf
+/plots/**/*.jpg
 .ipynb_checkpoints
 __pycache__
 *.7z
