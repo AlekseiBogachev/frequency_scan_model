@@ -81,7 +81,7 @@ class BaseModel(BaseEstimator, RegressorMixin):
         raise NotImplementedError('Implement _get_dlts() in ' + self.__class__.__name__ + '.') 
         
         
-    def fit(self, X, y):
+    def fit(self, X, y, initial_exps_params_=None):
         raise NotImplementedError('Implement fit() in ' + self.__class__.__name__ + '.') 
     
     
@@ -195,9 +195,13 @@ class SklSingleExpFrequencyScan(BaseModel):
         self._p_coef = tf.Variable(val, dtype='float64')
         
         
-    def fit(self, X, y):
+    def fit(self, X, y, initial_exps_params_=None):
         
-        self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), np.random.uniform(low=-1, high=1)]]
+        if initial_exps_params_ is None:
+            self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), np.random.uniform(low=-1, high=1)]]
+        else:
+            self.exps_params_ = initial_exps_params_
+
         self._update_M()
         self.p_coef_ = 1.0
         
@@ -281,7 +285,7 @@ class SklMultiExpFrequencyScan(BaseModel):
         return tf.reduce_sum(terms, axis=0)
     
     
-    def fit(self, X, y):
+    def fit(self, X, y, initial_exps_params_=None):
         
         
         frequency_powers = tf.Variable(X, dtype='float64')
@@ -289,9 +293,14 @@ class SklMultiExpFrequencyScan(BaseModel):
         
         self._fit_results = pd.DataFrame()
         prev_loss = tf.Variable(np.inf, dtype='float64')
-        self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), 
-                              np.random.uniform(low=-1/self.n_exps, high=1/self.n_exps)] 
-                             for _ in range(self.n_exps)]
+        
+        if initial_exps_params_ is None:
+            self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), 
+                                  np.random.uniform(low=-1/self.n_exps, high=1/self.n_exps)] 
+                                 for _ in range(self.n_exps)]
+        else:
+            self.exps_params_ = initial_exps_params_
+
         self._update_M()
         
         for i in range(self.n_iters):
