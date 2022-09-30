@@ -1,2 +1,2 @@
 # pydlts
-Models for DLTS frequency scans 
+Tools for processing DLTS data.
