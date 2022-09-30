@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydlts"
+version = "0.0.1"
+authors = [{author = "Aleksei Bogachev", email = "bogachev.aleksey.m@gmail.com"}]
+description = "Tools for processing DLTS data"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["DLTS", "exponential analysis"]
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy",
+    "pandas",
+    "sklearn",
+    "tensorflow",
+    "matplotlib",
+]
