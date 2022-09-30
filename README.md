@@ -1,2 +1,2 @@
-# frequency_scan_model
+# pydlts
 Models for DLTS frequency scans 
