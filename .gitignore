@@ -1,10 +1,11 @@
 /miscellaneous
-/dataset/**/*.csv
-/models/**/*.csv
-/plots/**/*.pdf
-/plots/**/*.jpg
+/dataset/**/**
+/models/**/**
+/plots/**/**
+/raw_data/**/**
 .ipynb_checkpoints
 __pycache__
 *.7z
 *.bak
 ~$*
+!.gitkeep

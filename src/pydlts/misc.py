@@ -1,9 +1,18 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from os import listdir
 import re
 
-class DataReader():
+
+
+RAW_DATA_PATH = '../raw_data'
+DATASETS_PATH = '../datasets'
+PLOTS_PATH = '../plots'
+
+
+
+class DataReaderDLS82E():
     """
     Reader for experimental data obtained on the measuring complex for DLTS. 
     It can read csv-files and experimental data split into two files (it's
@@ -410,3 +419,117 @@ class DataReader():
                       )
         
         return fig, ax
+
+
+
+class BatchDataReaderDLS82E():
+
+
+    def __init__(self, 
+                 integral_time = 3.0,
+                 time_between_meas = 3.5,
+                 raw_data_path=RAW_DATA_PATH, 
+                 datasets_path=DATASETS_PATH, 
+                 plots_path=PLOTS_PATH):
+        
+        self.integral_time = integral_time
+        self.time_between_meas = time_between_meas
+
+        self.raw_data_folder = raw_data_path
+        self.datasets_folder = datasets_path
+        self.plots_folder = plots_path
+
+
+    def _get_file_names(self):
+        
+        condition = lambda x: not x.startswith('Температура')
+        file_name_list = filter(condition, listdir(self.raw_data_folder))
+        
+        files = pd.DataFrame({'data_files': file_name_list})
+        files['temperature_files'] = 'Температура_' + files + '.txt'
+
+        return files
+
+
+    def _get_params(self, files):
+
+        files['patterns'] = files.data_files.str.split('_')
+        
+        get_spc_name = lambda x: ' '.join(x[:2])
+        files['specimen_name'] = files.patterns.apply(get_spc_name)
+        
+        get_bs = lambda x: int(x[3].strip('пФ'))
+        files['bs'] = files.patterns.apply(get_bs)
+        
+        get_u1 = lambda x: float(re.findall(string=x[5], pattern=r'[+-]?\d+\.?\d*')[0])
+        files['u1'] = files.patterns.apply(get_u1)
+        
+        get_ur = lambda x: float(re.findall(string=x[5], pattern=r'[+-]?\d+\.?\d*')[-1])
+        files['ur'] = files.patterns.apply(get_ur)
+        
+        get_ls = lambda x: int(x[6].strip('мВ'))
+        files['ls'] = files.patterns.apply(get_ls)
+        
+        get_f_pulse = lambda x: float(x[7].strip('мкс'))
+        files['f_pulse'] = files.patterns.apply(get_f_pulse)
+        
+        files['time_between_meas'] = self.time_between_meas
+        files['integral_time'] = self.integral_time
+        
+        return files.drop('patterns', axis='columns')
+
+
+    def _get_meta_data(self):
+
+        files = self._get_file_names()
+
+        return self._get_params(files)
+
+
+    def _init_data_reader(self, meta_data):
+        data_reader = DataReaderDLS82E()
+
+        d_file_name = self.raw_data_folder + '/' + meta_data.data_files
+        t_file_name = self.raw_data_folder + '/' + meta_data.temperature_files
+
+        data_reader.read_from_d_t(d_file_name=d_file_name, t_file_name=t_file_name)
+
+        data_reader.set_bs(meta_data.bs)
+
+        data_reader.set_ls(meta_data.ls)
+
+        data_reader.set_f_pulse(meta_data.f_pulse)
+
+        data_reader.compute_dlts_pf()
+
+        data_reader.set_specimen_name(meta_data.specimen_name)
+
+        data_reader.set_u1(meta_data.u1)
+
+        data_reader.set_ur(meta_data.ur)
+
+        data_reader.set_time_between_meas(meta_data.time_between_meas)
+
+        data_reader.set_integral_time(meta_data.integral_time)
+
+        return data_reader
+
+
+    def read_data(self):
+        meta_data = self._get_meta_data()
+
+        for i, meta in meta_data.iterrows():
+            try:
+                data_reader = self._init_data_reader(meta_data=meta)
+                
+            except FileNotFoundError:
+                print(f'№{i:<3}\t{meta_data.data_files[i]:<70}\t- FileNotFoundError')
+                
+            else:
+                data_reader.to_csv(self.datasets_folder + '/' + meta_data.data_files[i] + '.csv')
+
+                data_reader.get_plot()
+                plt.savefig(self.plots_folder + '/' + meta_data.data_files[i] + '.pdf')
+
+                plt.close('all')
+                print(f'№{i:<3}\t{meta_data.data_files[i]:<70}\t- Ok')
