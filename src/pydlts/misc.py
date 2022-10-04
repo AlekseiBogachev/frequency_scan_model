@@ -141,7 +141,7 @@ class DataReaderDLS82E():
                                        skiprows=1,
                                        engine='python')
         
-        with open(d_file_name, 'r') as f:
+        with open(d_file_name, 'r', encoding=encoding) as f:
             date_str = re.findall('\d\d\.\d\d\.\d\d\d\d', f.read())
         
         dlts_data['time'] = dlts_data.time + ' ' + date_str
