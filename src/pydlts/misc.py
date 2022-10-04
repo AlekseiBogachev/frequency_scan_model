@@ -13,10 +13,11 @@ from pydlts.fsplots import plot_experimental_points
 
 
 
-RAW_DATA_PATH = '../raw_data'
 DATASETS_PATH = '../datasets'
-PLOTS_PATH = '../plots'
 MODELS_PATH = '../models'
+PLOTS_PATH = '../plots'
+RAW_DATA_PATH = '../raw_data'
+REPORT_PATH = '../Отчёт'
 
 
 
@@ -739,3 +740,183 @@ class BatchSingleExp():
         messages = Parallel(n_jobs=self.n_jobs)(delayed(self._write_model)(f_name, df) for f_name, df in df_list)
 
         return messages
+
+
+
+class AutoReport():
+
+
+    def __init__(self,
+                 plots_path=PLOTS_PATH,
+                 models_path=MODELS_PATH,
+                 report_path=REPORT_PATH,
+                ):
+
+        self.plots_folder = plots_path
+        self.models_folder = models_path
+        self.report_folder = report_path
+
+
+    def _get_file_names(self):
+        return [self.models_folder + '/' + name for name in listdir(self.models_folder)]
+
+
+    def _read_datasets(self, file_names):
+
+        read_dataset = lambda name: pd.read_csv(name,
+                                                header=0,
+                                                parse_dates=[0],
+                                                infer_datetime_format=True
+                                               )
+
+        datasets = [[f_name, read_dataset(f_name)] for f_name in file_names]
+
+        get_timestamp = lambda x: x[1].time[0]
+
+        datasets.sort(key=get_timestamp)
+
+        return datasets
+
+
+    def _create_section(self, name):
+        template = r'\section{{{name}}}'
+        return template.format(name=name) + '\n'
+
+
+    def _create_subsection(self, name):
+        template = r'\subsection{{{name}}}'
+        return template.format(name=name) + '\n'
+
+
+    def _create_info_about_exp(self, dataset, caption, label):
+
+        template = r'''\begin{{table}}[!ht]
+    \centering
+    \caption{{{caption}}}
+    \begin{{tabular}}{{|l|l|}}
+        \hline
+        Параметр                                       & Значение                  \\ \hline
+        Образец                                        & {specimen_name:<25s} \\ \hline
+        Балансировка моста                             & см. рабочий журнал        \\ \hline
+        Чувствительность моста, пФ                     & {bs:<25d} \\ \hline
+        Чувствительность селектора, мВ                 & {ls:<25d} \\ \hline
+        $U_R$, В                                       & {ur:<25.2f} \\ \hline
+        $U_1$, В                                       & {u1:<25.2f} \\ \hline
+        Температура в лаборатории, $^\circ C$          & см. рабочий журнал        \\ \hline
+        Температура образца в начале сканирования, $K$ & {temperature:<25.2f} \\ \hline
+        Температура, установленная на КТХ, $^\circ C$  & см. рабочий журнал        \\ \hline
+        Время начала сканирования                      & {time:<25s} \\ \hline
+        Дата                                           & {date:<25s} \\ \hline
+    \end{{tabular}}
+    \label{{{label}}}
+\end{{table}}
+'''
+    
+        first_row = dataset.loc[0, :]
+        text = template.format(caption = caption,
+                               label = label,
+                               specimen_name = first_row.specimen_name,
+                               bs = first_row.bs,
+                               ls = first_row.ls,
+                               ur = first_row.ur,
+                               u1 = first_row.u1,
+                               temperature = first_row.temperature_k,
+                               time = str(first_row.time.time()),
+                               date = str(first_row.time.date())
+                              )
+        
+        return text + '\n'
+
+
+    def _create_info_about_model(self, dataset, caption, label):
+        template = r'''\begin{{table}}[!ht]
+    \centering
+    \caption{{{caption}}}
+    \begin{{tabular}}{{|l|r|}}
+        \hline
+        Параметр                                       & Значение                  \\ \hline
+        $\log_{{10}}(\tau)$, $\log_{{10}}$(с)              & {tau_pow:<25e} \\ \hline
+        $\tau$, с                                      & {tau:<25e} \\ \hline
+        $A$, пФ                                        & {amplitude:<25e} \\ \hline
+        $p$                                            & {p_coef:<25e} \\ \hline
+        MSE, пФ$^2$                                    & {mse:<25e} \\ \hline
+        RMSE пФ                                        & {rmse:<25e} \\ \hline
+    \end{{tabular}}
+    \label{{{label}}}
+\end{{table}}
+'''
+    
+        first_row = dataset.loc[0, :]
+        text = template.format(caption = caption,
+                               label = label,
+                               tau_pow = first_row.time_constant_power_model,
+                               tau = first_row.time_constant_model,
+                               amplitude = first_row.amplitude_model,
+                               p_coef = first_row.p_coef_model,
+                               mse = first_row.rmse_model ** 2,
+                               rmse = first_row.rmse_model
+                              )
+        
+        return text + '\n'
+
+
+    def _create_image(self, pic_name, caption, label, size=1):
+        template = r'''\begin{{figure}}[!ht]
+    \centering
+    \includegraphics[width={size}\textwidth]{{{pic_name}}}
+    \caption{{{caption}}}
+    \label{{{label}}}
+\end{{figure}}
+'''
+        text = template.format(pic_name = pic_name,
+                               caption = caption,
+                               label = label,
+                               size = size
+                              )
+        return text + '\n'
+
+
+    def create_auto_report(self):
+
+        file_names = self._get_file_names()
+        datasets = self._read_datasets(file_names)
+
+        get_model_plots_name = lambda fname, plot_path: plot_path + '/' + fname.split('/')[-1].rstrip('.csv') + '.pdf'
+        model_plots_names = [get_model_plots_name(name, self.plots_folder) for (name, _) in datasets]
+
+        get_exp_plots_name = lambda fname, plot_path: plot_path + '/' + fname.split('/')[-1].rstrip('_model.csv') + '.pdf'
+        exp_plots_names = [get_exp_plots_name(name, self.plots_folder) for (name, _) in datasets]
+
+        prep_fname = lambda fname: fname.replace('_', r'\_')
+
+
+        with open(self.report_folder + '/results.tex', 'w', encoding='UTF-8') as file:
+            file.write(r'%Файл сгенерирован автоматически на основе собранных и обработанных данных' + '\n\n\n')
+            file.write(self._create_section('Результаты измерений'))
+            file.write('В данном разделе приведены результаты измерений и идентификации параметров полученных сканов.\n')
+            
+            for i, (fname, data) in enumerate(datasets):
+                file.write(self._create_subsection(f'Частотный скан №{i+1}'))
+                file.write(self._create_info_about_exp(data, f'Параметры частотного скана №{i+1}.', f'table:frequency_scan_{i+1}'))
+                
+                file.write(self._create_info_about_model(data, 
+                                                   f'Параметры модели частотного скана №{i+1}.',
+                                                   f'table:frequency_scan_model_{i+1}'))
+                
+                file.write(r'\textbf{Имена файлов}' + '\n\n')
+                file.write(r'Результаты измерений и параметры модели:' + '\n\n')
+                file.write(r'\scriptsize' + prep_fname(fname) + '\n' + r'\normalsize' + '\n\n')
+                file.write(r'График с результатами измерений:' + '\n\n')
+                file.write(r'\scriptsize' + prep_fname(exp_plots_names[i]) + '\n' + r'\normalsize' + '\n\n')
+                file.write(r'График с результатами идентификации модели:' + '\n\n')
+                file.write(r'\scriptsize' + prep_fname(model_plots_names[i]) + '\n' + r'\normalsize' + '\n\n')
+                
+                file.write(self._create_image(pic_name=exp_plots_names[i], 
+                                        caption=f'Частотный скан №{i+1}.', 
+                                        label=f'pic:frequency_scan_{i+1}'))
+                
+                file.write(self._create_image(pic_name=model_plots_names[i], 
+                                        caption=f'Результаты идентификации параметров модели частотного скана~№{i+1}.', 
+                                        label=f'pic:frequency_scan_model{i+1}'))
+                
+                file.write(r'\pagebreak'+'\n\n\n')
