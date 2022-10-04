@@ -1,14 +1,22 @@
-import numpy as np
-import pandas as pd
+from joblib import delayed
+from joblib import Parallel
 from matplotlib import pyplot as plt
+import numpy as np
 from os import listdir
+import pandas as pd
 import re
+
+from pydlts.fsmodels import SklSingleExpFrequencyScan
+from pydlts.fsplots import plot_model
+from pydlts.fsplots import plot_loss_path
+from pydlts.fsplots import plot_experimental_points
 
 
 
 RAW_DATA_PATH = '../raw_data'
 DATASETS_PATH = '../datasets'
 PLOTS_PATH = '../plots'
+MODELS_PATH = '../models'
 
 
 
@@ -533,3 +541,201 @@ class BatchDataReaderDLS82E():
 
                 plt.close('all')
                 print(f'№{i:<3}\t{meta_data.data_files[i]:<70}\t- Ok')
+
+
+
+class BatchSingleExp():
+
+
+    def __init__(self,
+                 fit_p_coef = True,
+                 learning_rate = 0.05,
+                 n_iters = 1000,
+                 stop_val = 10**-10,
+                 verbose = False,
+                 datasets_path=DATASETS_PATH,
+                 plots_path=PLOTS_PATH,
+                 models_path=MODELS_PATH,
+                 n_jobs=1,
+                ):
+
+        self.fit_p_coef = fit_p_coef
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.stop_val = stop_val
+        self.verbose = verbose
+
+        self.datasets_folder = datasets_path
+        self.plots_folder = plots_path
+        self.models_folder = models_path
+        self.n_jobs = n_jobs
+
+
+    def _get_file_names(self):
+        return [self.datasets_folder + '/' + name for name in listdir(self.datasets_folder)]
+
+
+    def _read_datasets(self, file_names):
+
+        read_dataset = lambda name: pd.read_csv(name,
+                                                header=0,
+                                                parse_dates=[0],
+                                                infer_datetime_format=True
+                                               )
+
+        return [[f_name, read_dataset(f_name)] for f_name in file_names]
+
+
+    def _fit_model(self, df):
+
+        f_pulse = df.f_pulse[0] * 10 ** -6
+
+        X_train = df.frequency_hz.to_numpy()
+        X_train = np.log10(X_train)
+
+        y_train = df.dlts_pf.to_numpy()
+
+        max_abs_index = np.absolute(y_train).argmax()
+        max_abs_y = y_train[max_abs_index]
+
+        new_max_y = X_train.max()
+
+        normalize = lambda x: x / max_abs_y * new_max_y
+        denormalize = lambda x: x * max_abs_y / new_max_y
+
+        y_train = normalize(y_train)
+
+        model = SklSingleExpFrequencyScan(filling_pulse=f_pulse,
+                                          fit_p_coef=self.fit_p_coef,
+                                          learning_rate=self.learning_rate,
+                                          n_iters=self.n_iters,
+                                          stop_val=self.stop_val,
+                                          verbose=self.verbose
+                                         )
+
+        model.fit(X=X_train, y=y_train)
+
+        fit_results_ = model.fit_results_
+        fit_results_.amplitude_0 = denormalize(fit_results_.amplitude_0)
+
+        return fit_results_
+
+
+    def _get_text_params(self,fit_result):
+        time_constant_power = fit_result.time_constant_pow_0
+        f_pulse = fit_result.filling_pulse
+        p = fit_result.p_coef
+        amp = fit_result.amplitude_0
+        mse = fit_result.loss
+
+        text = '\n'.join(['$\\log_{10}(\\tau)$ = ' + f'{time_constant_power:.4f} ' + '$\\log_{10}$(с)',
+                          f'$\\tau$ = {10**time_constant_power:.4e} с',
+                          f'$A$ = {amp:.4e} пФ',
+                          f'$p$ = {p:.4f}',
+                          f'MSE = {mse:.4e} $пФ^2$',
+                          f'RMSE = {np.sqrt(mse):.4e} пФ'
+                         ])
+
+        return text
+
+
+    def _get_additional_text(self, df, fit_results_):
+
+        frequency_powers = np.log10(df.frequency_hz.to_numpy())
+        dlts_values = df.dlts_pf.to_numpy()
+        f_pulse = df.f_pulse[0] * 10 ** (-6)
+        
+        text_1 = '\n'.join([f'Образец: {df.specimen_name[0]}',
+                            f'$T$ = {df.temperature_k.mean():.1f} К',
+                            f'$U_1$={df.u1[0]} В',
+                            f'$U_R$={df.ur[0]} В',
+                            f'$t_1$ = {f_pulse:.4e} с'
+                           ])
+        
+        text_2 = '\n'.join(['Конечные значения:', self._get_text_params(fit_results_.iloc[-1, :])])
+        
+        return text_1, text_2
+
+
+    def _print_results(self, df, fit_results_):
+
+        frequency = df.frequency_hz.to_numpy()
+        frequency_powers = np.log10(frequency)
+        actual_dlts = df.dlts_pf.to_numpy()
+
+        fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(15, 5))
+
+        ax0 = plot_model(X = frequency_powers,
+                         y = actual_dlts,
+                         model_class = SklSingleExpFrequencyScan,
+                         fit_results_ = fit_results_,
+                         plot_exps = False,
+                         ax=ax0
+                        )
+
+        ax1 = plot_loss_path(fit_results_, ax=ax1)
+
+        title = f'{df.specimen_name[0]} T={df.temperature_k.mean():.1f} K, $U_1$={df.u1[0]} V, $U_R$={df.ur[0]} V'
+        plt.suptitle(title, y=1.01)
+
+        text = '\n\n'.join(self._get_additional_text(df, fit_results_))
+
+        x = 0.4 * (max(ax1.get_xlim()) - min(ax1.get_xlim())) + min(ax1.get_xlim())
+        y = 0.95 * max(ax1.get_ylim())
+        fontsize=10
+        bbox_dict = {'facecolor':'white', 'alpha':0.8, 'edgecolor':'gray'}
+            
+        ax1.text(x, y, text, fontsize=fontsize, verticalalignment='top', bbox=bbox_dict)
+        
+        return fig, (ax0, ax1)
+
+
+    def _write_model(self, f_name, df):
+
+        fit_results_ = self._fit_model(df)
+
+        fig, ax = self._print_results(df, fit_results_)
+
+        last_row = fit_results_.iloc[-1]
+        final_model = SklSingleExpFrequencyScan(filling_pulse=last_row.filling_pulse)
+        final_model.exps_params_ = [ [ last_row.time_constant_pow_0, last_row.amplitude_0 ] ]
+        final_model.p_coef_ = last_row.p_coef
+
+        model_df = df.copy()
+
+        frequency_powers = np.log10(df.frequency_hz.to_numpy())
+        model_df['dlts_pf_model'] = final_model.predict(frequency_powers)
+        model_df['p_coef_model'] = final_model.p_coef_
+
+        if model_df['p_coef_model'].isna().any():
+            message = f_name.split('/')[-1].rstrip('.csv') + '_model - ERROR'
+        else:
+            message = f_name.split('/')[-1].rstrip('.csv') + '_model - OK'
+
+        model_df['time_constant_power_model'] = final_model.exps_params_[0, 0]
+        model_df['time_constant_model'] = 10 ** final_model.exps_params_[0, 0]
+        model_df['amplitude_model'] = final_model.exps_params_[0, 1]
+
+        mse = np.square(model_df.dlts_pf - model_df.dlts_pf_model)
+        model_df['rmse_model'] = np.sqrt(mse)
+
+        file_name = self.models_folder + '/' + f_name.split('/')[-1].rstrip('.csv') + '_model' + '.csv'
+        model_df.to_csv(file_name, index=False)
+        
+        file_name = self.plots_folder + '/' + f_name.split('/')[-1].rstrip('.csv') + '_model' + '.pdf'
+        plt.savefig(file_name, bbox_inches='tight')
+        
+        plt.close('all')
+        
+        return message
+
+
+
+
+    def create_models(self):
+        f_names = self._get_file_names()
+        df_list = self._read_datasets(f_names)
+
+        messages = Parallel(n_jobs=self.n_jobs)(delayed(self._write_model)(f_name, df) for f_name, df in df_list)
+
+        return messages
