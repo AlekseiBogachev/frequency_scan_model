@@ -673,6 +673,7 @@ class BatchSingleExp():
                          plot_exps = False,
                          ax=ax0
                         )
+        ax0.set_ylabel('Сигнал DLTS, пФ')
 
         ax1 = plot_loss_path(fit_results_, ax=ax1)
 
