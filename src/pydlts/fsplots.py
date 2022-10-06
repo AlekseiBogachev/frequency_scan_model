@@ -70,6 +70,7 @@ def plot_spectr(exps_params_, ax=None, xlim=[1/2500, 1], ylim=None):
 
 
 def plot_perfect_scan(X, exps_params_, f_pulse, label, ax=None, marker='-.'):
+
     axes_flag = ax is None
     if axes_flag:
         fig, ax = plt.subplots(1,1)
@@ -86,6 +87,10 @@ def plot_perfect_scan(X, exps_params_, f_pulse, label, ax=None, marker='-.'):
 
 
 def plot_model(X, y, model_class, fit_results_, ax=None, plot_exps=True):
+
+    sorted_index = X.argsort()
+    X = X[sorted_index]
+    y = y[sorted_index]
 
     initial_params = _get_params_fom_iter(0, fit_results_)
     initial_dlts = _get_y(X, model_class, **initial_params)
