@@ -88,11 +88,11 @@ class BaseModel(BaseEstimator, RegressorMixin):
         exps_params = self.exps_params_
         exps_params[:, 1] = self._denormalize(exps_params[:, 1])
         self.exps_params_ = exps_params
-        
-        self._fit_results.loss = self._fit_results.loss / self._k_norm ** 2
 
-        for i, amp in enumerate(self._exps_params[:, 1]):
-            self._fit_results[f'amplitude_{i}'] = self._denormalize(amp)
+        for i, amp in enumerate(exps_params[:, 1]):
+            self._fit_results[f'amplitude_{i}'] = amp
+
+        self._fit_results.loss = self._fit_results.loss / self._k_norm ** 2
     
     
     def predict(self, X):

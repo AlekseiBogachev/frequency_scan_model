@@ -596,16 +596,6 @@ class BatchSingleExp():
 
         y_train = df.dlts_pf.to_numpy()
 
-        max_abs_index = np.absolute(y_train).argmax()
-        max_abs_y = y_train[max_abs_index]
-
-        new_max_y = X_train.max()
-
-        normalize = lambda x: x / max_abs_y * new_max_y
-        denormalize = lambda x: x * max_abs_y / new_max_y
-
-        y_train = normalize(y_train)
-
         model = SklSingleExpFrequencyScan(filling_pulse=f_pulse,
                                           fit_p_coef=self.fit_p_coef,
                                           learning_rate=self.learning_rate,
@@ -616,10 +606,7 @@ class BatchSingleExp():
 
         model.fit(X=X_train, y=y_train)
 
-        fit_results_ = model.fit_results_
-        fit_results_.amplitude_0 = denormalize(fit_results_.amplitude_0)
-
-        return fit_results_
+        return model.fit_results_
 
 
     def _get_text_params(self,fit_result):
