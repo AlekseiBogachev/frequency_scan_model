@@ -70,6 +70,29 @@ class BaseModel(BaseEstimator, RegressorMixin):
             prev_loss = current_loss
 
         return tf.Variable([-1 / current_loss])
+
+
+    def _get_k_norm(self, X, y):
+        self._k_norm = X.max() / np.abs(y).max()
+
+
+    def _normalize(self, value):
+        return value * self._k_norm
+
+
+    def _denormalize(self, value):
+        return value / self._k_norm
+
+
+    def _denormalize_model(self):
+        exps_params = self.exps_params_
+        exps_params[:, 1] = self._denormalize(exps_params[:, 1])
+        self.exps_params_ = exps_params
+        
+        self._fit_results.loss = self._fit_results.loss / self._k_norm ** 2
+
+        for i, amp in enumerate(self._exps_params[:, 1]):
+            self._fit_results[f'amplitude_{i}'] = self._denormalize(amp)
     
     
     def predict(self, X):
@@ -81,7 +104,7 @@ class BaseModel(BaseEstimator, RegressorMixin):
         raise NotImplementedError('Implement _get_dlts() in ' + self.__class__.__name__ + '.') 
         
         
-    def fit(self, X, y, initial_exps_params_=None):
+    def fit(self, X, y, initial_exps_params_=None, normalization=True):
         raise NotImplementedError('Implement fit() in ' + self.__class__.__name__ + '.') 
     
     
@@ -195,8 +218,12 @@ class SklSingleExpFrequencyScan(BaseModel):
         self._p_coef = tf.Variable(val, dtype='float64')
         
         
-    def fit(self, X, y, initial_exps_params_=None):
-        
+    def fit(self, X, y, initial_exps_params_=None, normalization=True):
+
+        if normalization:
+            self._get_k_norm(X, y)
+            y = self._normalize(y)
+
         if initial_exps_params_ is None:
             self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), np.random.uniform(low=-1, high=1)]]
         else:
@@ -240,6 +267,9 @@ class SklSingleExpFrequencyScan(BaseModel):
                 self._p_coef.assign_sub(self.learning_rate * d_p_coef)
                 
             prev_loss = current_loss
+
+        if normalization:
+            self._denormalize_model()
         
         return self
     
@@ -285,8 +315,11 @@ class SklMultiExpFrequencyScan(BaseModel):
         return tf.reduce_sum(terms, axis=0)
     
     
-    def fit(self, X, y, initial_exps_params_=None):
-        
+    def fit(self, X, y, initial_exps_params_=None, normalization=True):
+
+        if normalization:
+            self._get_k_norm(X, y)
+            y = self._normalize(y)
         
         frequency_powers = tf.Variable(X, dtype='float64')
         dlts = tf.Variable(y, dtype='float64')
@@ -326,5 +359,8 @@ class SklMultiExpFrequencyScan(BaseModel):
             self._update_M()
         
             prev_loss = current_loss
+
+        if normalization:   
+            self._denormalize_model()
  
         return self
