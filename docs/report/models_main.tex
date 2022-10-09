@@ -1,0 +1,70 @@
+\documentclass[14pt]{extarticle}
+
+\usepackage{geometry}
+\geometry{a4paper,
+          total={165mm,257mm},
+          left=30mm,
+          top=20mm,
+         }
+
+% \documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1, T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{csquotes}
+
+\usepackage[
+    backend = biber,
+    style = numeric,
+]{biblatex}
+
+\addbibresource{Refs.bib}
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+% \usepackage[table,xcdraw]{xcolor}
+
+\usepackage{cmap}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+    pdftitle={Отчёт о моделировании частотных сканов},
+    pdfpagemode=UseOutlines,
+    % pdfstartview={FitB}
+}
+\urlstyle{same}
+
+
+\title{Моделирование частотных сканов}
+\author{Богачёв А.М.}
+\date{\today}
+
+
+\begin{document}
+
+    \maketitle
+
+    \begin{abstract}
+        В отчёте приведены результаты исследований...
+    \end{abstract}
+
+    \tableofcontents
+
+    \include{models_introduction}
+
+    \include{model_fsmodels}
+
+
+
+
+    \printbibliography[heading=bibintoc, 
+                       title={Список литературы}]
+
+\end{document}
