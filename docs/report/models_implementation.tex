@@ -247,9 +247,61 @@
     Квартет Энскомба (рисунок \ref{pic:anscombe_quartet}) 
     \cite{anscombe_quartet_wikipedia}, \cite{anscombe_quartet_article}.
 
+    \begin{table}[!htp]
+    	\centering
+    	\caption{Статистические свойства наборов данных в Квартете Энскомба}
+		\begin{tabular}{|l|l|}
+			\hline
+			Характеристика                         & Значение   \\ \hline
+			Среднее значение переменной $x$        & 9.0        \\ \hline
+			Дисперсия переменной $x$               & 10.0       \\ \hline
+			Среднее значение переменной $y$        & 7.5        \\ \hline
+			Дисперсия переменной $y$               & 3.75       \\ \hline
+			Корреляция между переменными $x$ и $y$ & 0.816      \\ \hline
+			Прямая линейной регрессии              & $y=3+0.5x$ \\ \hline
+			Коэффициент детерминации               & 0.67       \\
+			линейной регрессии ($R^2$)             &            \\ \hline
+		\end{tabular}
+		\label{table:anscombe_quartet_statistics}
+	\end{table}
+
+	\begin{table}[!htp]
+    	\centering
+    	\caption{Значения корней из среднеквадратической ошибки}
+		\begin{tabular}{|l|c|c|c|c|}
+			\hline
+			Набор данных                        & I     & II    & III   & IV    \\ \hline
+			Значение корня среднеквадратической & 1.119 & 1.119 & 1.118 & 1.118 \\ 
+			ошибки (RMSE)                       &       &       &       &       \\ \hline
+		\end{tabular}
+		\label{table:anscombe_quartet_rmse}
+	\end{table}
+
+    \begin{table}[!htp]
+    	\centering
+    	\caption{Квартет Энскомба}
+		\begin{tabular}{|ll|ll|ll|ll|}
+			\hline
+			\multicolumn{2}{|c|}{I}                             & \multicolumn{2}{c|}{II}                            & \multicolumn{2}{c|}{III}                           & \multicolumn{2}{c|}{IV}                            \\ \hline
+			\multicolumn{1}{|c|}{x}    & \multicolumn{1}{c|}{y} & \multicolumn{1}{c|}{x}    & \multicolumn{1}{c|}{y} & \multicolumn{1}{c|}{x}    & \multicolumn{1}{c|}{y} & \multicolumn{1}{c|}{x}    & \multicolumn{1}{c|}{y} \\ \hline
+			\multicolumn{1}{|l|}{10,0} & 8,04                   & \multicolumn{1}{l|}{10,0} & 9,14                   & \multicolumn{1}{l|}{10,0} & 7,46                   & \multicolumn{1}{l|}{8,0}  & 6,58                   \\ \hline
+			\multicolumn{1}{|l|}{8,0}  & 6,95                   & \multicolumn{1}{l|}{8,0}  & 8,14                   & \multicolumn{1}{l|}{8,0}  & 6,77                   & \multicolumn{1}{l|}{8,0}  & 5,76                   \\ \hline
+			\multicolumn{1}{|l|}{13,0} & 7,58                   & \multicolumn{1}{l|}{13,0} & 8,74                   & \multicolumn{1}{l|}{13,0} & 12,74                  & \multicolumn{1}{l|}{8,0}  & 7,71                   \\ \hline
+			\multicolumn{1}{|l|}{9,0}  & 8,81                   & \multicolumn{1}{l|}{9,0}  & 8,77                   & \multicolumn{1}{l|}{9,0}  & 7,11                   & \multicolumn{1}{l|}{8,0}  & 8,84                   \\ \hline
+			\multicolumn{1}{|l|}{11,0} & 8,33                   & \multicolumn{1}{l|}{11,0} & 9,26                   & \multicolumn{1}{l|}{11,0} & 7,81                   & \multicolumn{1}{l|}{8,0}  & 8,47                   \\ \hline
+			\multicolumn{1}{|l|}{14,0} & 9,96                   & \multicolumn{1}{l|}{14,0} & 8,10                   & \multicolumn{1}{l|}{14,0} & 8,84                   & \multicolumn{1}{l|}{8,0}  & 7,04                   \\ \hline
+			\multicolumn{1}{|l|}{6,0}  & 7,24                   & \multicolumn{1}{l|}{6,0}  & 6,13                   & \multicolumn{1}{l|}{6,0}  & 6,08                   & \multicolumn{1}{l|}{8,0}  & 5,25                   \\ \hline
+			\multicolumn{1}{|l|}{4,0}  & 4,26                   & \multicolumn{1}{l|}{4,0}  & 3,10                   & \multicolumn{1}{l|}{4,0}  & 5,39                   & \multicolumn{1}{l|}{19,0} & 12,50                  \\ \hline
+			\multicolumn{1}{|l|}{12,0} & 10,84                  & \multicolumn{1}{l|}{12,0} & 9,13                   & \multicolumn{1}{l|}{12,0} & 8,15                   & \multicolumn{1}{l|}{8,0}  & 5,56                   \\ \hline
+			\multicolumn{1}{|l|}{7,0}  & 4,82                   & \multicolumn{1}{l|}{7,0}  & 7,26                   & \multicolumn{1}{l|}{7,0}  & 6,42                   & \multicolumn{1}{l|}{8,0}  & 7,91                   \\ \hline
+			\multicolumn{1}{|l|}{5,0}  & 5,68                   & \multicolumn{1}{l|}{5,0}  & 4,74                   & \multicolumn{1}{l|}{5,0}  & 5,73                   & \multicolumn{1}{l|}{8,0}  & 6,89                   \\ \hline
+		\end{tabular}
+		\label{table:anscombe_quartet}
+	\end{table}
+
     \begin{figure}[!htp]
         \centering
-        \includegraphics[width=0.75\textwidth]{anscombe_quartet}
+        \includegraphics[width=0.6\textwidth]{anscombe_quartet}
         \caption{Квартет Энскомба.}
         \label{pic:anscombe_quartet}
     \end{figure}
