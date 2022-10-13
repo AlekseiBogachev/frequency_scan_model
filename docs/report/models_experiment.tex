@@ -454,3 +454,101 @@
 		\caption{Спектр сигнала релаксации ёмкости.}
 		\label{pic:spectr_single_exp_303}
 	\end{figure}
+
+
+
+	\newpage
+	\subsubsection{Моноэкспоненциальная модель с показателем $p=1$}
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_single_exp_ideal_model}
+		\caption{Результат идентификации положительного пика частотного скана
+		         при $T=303K$.}
+		\label{pic:model_single_exp_ideal_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.35\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_single_exp_ideal_model_loss}
+		\caption{График среднеквадратической ошибки в процессе идентификации,
+		         нормированной относительно её максимального значения.}
+		\label{pic:loss_single_exp_ideal_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_single_exp_ideal_deviations}
+		\caption{График отклонений результатов, полученных на идентифицированной
+		модели, от экспериментальных данных.}
+		\label{pic:deviations_single_exp_ideal_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_single_exp_ideal_hist}
+		\caption{Гистограмма отклонений данных, полученных на идентифицированной 
+		         модели, от экспериментальных данных.}
+		\label{pic:hist_single_exp_ideal_303}
+	\end{figure}
+
+	\textbf{Оценка точности с помощью кросвалидации: 0.005837 пФ}
+
+	\textbf{RMSE, полученное на тренировочном наборе: 0.005436 пФ}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_single_exp_ideal_spectr}
+		\caption{Спектр сигнала релаксации ёмкости.}
+		\label{pic:spectr_single_exp_ideal_303}
+	\end{figure}
+
+
+
+	\newpage
+	\subsubsection{Многоэкспоненциальная модель с n\_exps > 1}
+	
+	Лучший результат показала модель с параметром n\_exps = 6, то есть имеющая
+	6 экспоненциальных составляющих
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_multi_exp_model}
+		\caption{Результат идентификации многоэкспоненциальной моделью 
+		         частотного скана при $T=303K$.}
+		\label{pic:multi_exp_model_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.35\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_multi_exp_loss}
+		\caption{График среднеквадратической ошибки в процессе идентификации,
+		         нормированной относительно её максимального значения.}
+		\label{pic:multi_exp_loss_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_multi_exp_deviations}
+		\caption{График отклонений результатов, полученных на идентифицированной
+		модели, от экспериментальных данных.}
+		\label{pic:multi_exp_deviations_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_multi_exp_hist}
+		\caption{Гистограмма отклонений данных, полученных на идентифицированной 
+		         модели, от экспериментальных данных.}
+		\label{pic:multi_exp_hist_303}
+	\end{figure}
+
+	\textbf{Оценка точности с помощью кросвалидации: 0.000442 пФ}
+
+	\textbf{RMSE, полученное на тренировочном наборе: 0.000338 пФ}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_multi_exp_spectr}
+		\caption{Спектр сигнала релаксации ёмкости.}
+		\label{pic:multi_exp_spectr_303}
+	\end{figure}
