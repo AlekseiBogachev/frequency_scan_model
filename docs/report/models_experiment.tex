@@ -525,7 +525,7 @@
 		\label{pic:hist_single_exp_283}
 	\end{figure}
 
-	В таблице \ref{table:results_single_exp_ideal_283} приведены параметры 
+	В таблице \ref{table:results_single_exp_283} приведены параметры 
 	идентифицированной модели и результаты оценок точности моделирования.
 
 	\begin{table}[!htp]
@@ -540,7 +540,7 @@
 			Результат кросвалидации (RMSE), пФ & 0.000160 \\ \hline
 			RMSE, пФ                           & 0.000161 \\ \hline
 		\end{tabular}
-		\label{table:results_single_exp_ideal_283}
+		\label{table:results_single_exp_283}
 	\end{table}
 
 	На рисунке \ref{pic:multi_exp_spectr_283} приведён полученный спектр 
@@ -823,7 +823,7 @@
 		\label{pic:hist_single_exp_303}
 	\end{figure}
 
-	В таблице \ref{table:results_single_exp_ideal_303} приведены параметры 
+	В таблице \ref{table:results_single_exp_303} приведены параметры 
 	идентифицированной модели и результаты оценок точности моделирования.
 
 	\begin{table}[!htp]
@@ -838,7 +838,7 @@
 			Результат кросвалидации (RMSE), пФ & 0.000713 \\ \hline
 			RMSE, пФ                           & 0.000660 \\ \hline
 		\end{tabular}
-		\label{table:results_single_exp_ideal_303}
+		\label{table:results_single_exp_303}
 	\end{table}
 
 	На рисунке \ref{pic:spectr_single_exp_303} приведён полученный спектр 
@@ -953,7 +953,7 @@
 		9                          & 0.0004572               \\ \hline
 		10                         & 0.0004476               \\ \hline
 		\end{tabular}
-		\label{table:multi_exp_model_283_cross_val}
+		\label{table:multi_exp_model_303_cross_val}
 	\end{table}
 
 	Результаты идентификации модели с шестью экспоненциальными составляющими
@@ -1021,7 +1021,7 @@
 			Результат кросвалидации (RMSE), пФ & 0.000442 &           &          \\ \hline
 			RMSE, пФ                           & 0.000338 &           &          \\ \hline
 		\end{tabular}
-		\label{table:multi_exp_results_263}
+		\label{table:multi_exp_results_303}
 	\end{table}
 
 	На рисунке \ref{pic:multi_exp_spectr_303} приведён полученный спектр 
@@ -1060,3 +1060,92 @@
 	\end{tabular}
 	\label{table:model_comparison_303}
 	\end{table}
+
+
+	\newpage
+	\subsection{Графики Аррениуса}
+	Для завершения анализа и вычисления спектров энергий активации, необходимо
+	построить графики Аррениуса. В предыдущем разделе многоэкспоненциальные
+	модели для 263~К, 283~К и 303~К имели разное оптимальное количество 
+	моноэкспоненциальных составляющих: 8, 6 и 6, соответственно. Для того, чтобы
+	было удобнее строить графики в координатах Аррениуса и интерпретировать 
+	результаты, выполним повторуную идентификацию всех частотных сканов 
+	многоэкспоненциальной моделью с шестью экспоненциальными составляющими.
+
+	Результат идентификации частотного скана при $T=263 K$ и соответствующий
+	спектр показаны на рисунках \ref{pic:6_exp_model_263} и 
+	\ref{pic:6_exp_spectr_263} соответственно.
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_1пФ_-10С_-4В-5В_10мВ_10мкс_шаг_0,01_6_exp_model}
+		\caption{Результат идентификации многоэкспоненциальной модели на 
+		частотном скане, полученном при $T=263 K$.}
+		\label{pic:6_exp_model_263}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_1пФ_-10С_-4В-5В_10мВ_10мкс_шаг_0,01_6_exp_spectr}
+		\caption{Спектр сигнала релаксации ёмкости при $T=263 K$.}
+		\label{pic:6_exp_spectr_263}
+	\end{figure}
+
+
+
+	Результат идентификации частотного скана при $T=283 K$ и соответствующий
+	спектр показаны на рисунках \ref{pic:6_exp_model_283} и 
+	\ref{pic:6_exp_spectr_283} соответственно.
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_1пФ_+10С_-4В-5В_50мВ_10мкс_шаг_0,01_6_exp_model}
+		\caption{Результат идентификации многоэкспоненциальной модели на 
+		частотном скане, полученном при $T=283 K$.}
+		\label{pic:6_exp_model_283}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_1пФ_+10С_-4В-5В_50мВ_10мкс_шаг_0,01_6_exp_spectr}
+		\caption{Спектр сигнала релаксации ёмкости при $T=283 K$.}
+		\label{pic:6_exp_spectr_283}
+	\end{figure}
+
+
+
+	Результат идентификации частотного скана при $T=303 K$ и соответствующий
+	спектр показаны на рисунках \ref{pic:6_exp_model_303} и 
+	\ref{pic:6_exp_spectr_303} соответственно.
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.75\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_6_exp_model}
+		\caption{Результат идентификации многоэкспоненциальной модели на 
+		частотном скане, полученном при $T=303 K$.}
+		\label{pic:6_exp_model_303}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{1564ЛЕ1№1_п1_2500Гц-1Гц_10пФ_+30С_-4В-5В_50мВ_10мкс_шаг_0,1_6_exp_spectr}
+		\caption{Спектр сигнала релаксации ёмкости при $T=303 K$.}
+		\label{pic:6_exp_spectr_303}
+	\end{figure}
+
+	Графики в координатах Аррениуса...
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{arrhenius_lin_regr_with_inset}
+		\caption{График в координатах Аррениуса с графиками линейной регрессии}
+		\label{pic:arrhenius_lin_regr_with_inset}
+	\end{figure}
+
+	\begin{figure}[!htp]
+		\centering
+		\includegraphics[width=0.5\textwidth]{arrhenius_poly_regr_with_inset}
+		\caption{График в координатах Аррениуса с графиками регрессии
+		         полиномом второй степени.}
+		\label{pic:arrhenius_poly_regr_with_inset}
+	\end{figure}
