@@ -1,0 +1,83 @@
+\documentclass[14pt]{extarticle}
+
+\usepackage{geometry}
+\geometry{a4paper,
+          total={165mm,257mm},
+          left=30mm,
+          top=20mm,
+         }
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1, T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{csquotes}
+
+\usepackage[
+    backend = biber,
+    style = numeric,
+]{biblatex}
+
+\addbibresource{Refs.bib}
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+\usepackage{cmap}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+    pdftitle={Отчёт о моделировании частотных сканов},
+    pdfpagemode=UseOutlines,
+    % pdfstartview={FitB}
+}
+\urlstyle{same}
+
+
+\title{Моделирование частотных сканов}
+\author{Богачёв А.М.}
+\date{\today}
+
+
+\begin{document}
+
+    \maketitle
+
+    \begin{abstract}
+        В отчёте предствалены результаты разработки и аппробации модели 
+        идеального частотного скана, модели частотного скана, учитывающей 
+        нелинейность измерительного тракта и неэкспоненциальность сигнала 
+        релаксации, модели многоэкспоненциального частотного скана. В отчёте
+        также приведены теоретические выражения, лежащие в основе разработанных
+        моделей, особенности технической реализации, некоторые методические 
+        ворпосы идентификации параметров моделей. Модели аппробованы на
+        экспериметальных данных, приведены сравнение и анализ результатов. 
+        Дополнительно выполнена идентификация многоэкспоненциальной модели с
+        шестью экспоненциальными составляющими и для полученных результатов 
+        построены графики в координатах Аррениуса. Показано, что ипользование
+        модели, учитывающей нелинейность и неэкспоненциальность, или 
+        многоэкспоненциальной модели позволяют повысить точность моделирования
+        частотных сканов.
+    \end{abstract}
+
+    \newpage
+    \tableofcontents
+
+    \include{models_introduction}
+
+    \include{models_fsmodels}
+
+    \include{models_implementation}
+
+    \include{models_experiment}
+
+    \include{models_conclusion}
+
+    \printbibliography[heading=bibintoc, 
+                       title={Список литературы}]
+
+\end{document}

@@ -84,15 +84,21 @@ class BaseModel(BaseEstimator, RegressorMixin):
         return value / self._k_norm
 
 
+    def _normalize_exps_params(self):
+        exps_params = self.exps_params_
+        exps_params[:, 1] = self._normalize(exps_params[:, 1])
+        self.exps_params_ = exps_params
+
+
     def _denormalize_model(self):
         exps_params = self.exps_params_
         exps_params[:, 1] = self._denormalize(exps_params[:, 1])
         self.exps_params_ = exps_params
 
-        for i, amp in enumerate(exps_params[:, 1]):
-            self._fit_results[f'amplitude_{i}'] = amp
+        for i in range(self.n_exps):
+            self._fit_results[f'amplitude_{i}'] /= self._k_norm
 
-        self._fit_results.loss = self._fit_results.loss / self._k_norm ** 2
+        self._fit_results.loss /= self._k_norm ** 2
     
     
     def predict(self, X):
@@ -164,7 +170,9 @@ class BaseModel(BaseEstimator, RegressorMixin):
         if loss is not None:
             print(f'loss: {loss}')
             
-        print(f'exps_params:\n{self.exps_params_}')
+        exps_params = self.exps_params_
+        exps_params[:, 1] = self._denormalize(exps_params[:, 1])
+        print(f'exps_params:\n{exps_params}')
         
         try:
             print(f'p_coef: {self.p_coef_}')
@@ -228,6 +236,8 @@ class SklSingleExpFrequencyScan(BaseModel):
             self.exps_params_ = [[np.random.uniform(low=-3.5, high=-1), np.random.uniform(low=-1, high=1)]]
         else:
             self.exps_params_ = initial_exps_params_
+            if normalization:
+                self._normalize_exps_params()
 
         self._update_M()
         self.p_coef_ = 1.0
@@ -333,6 +343,8 @@ class SklMultiExpFrequencyScan(BaseModel):
                                  for _ in range(self.n_exps)]
         else:
             self.exps_params_ = initial_exps_params_
+            if normalization:
+                self._normalize_exps_params()            
 
         self._update_M()
         
